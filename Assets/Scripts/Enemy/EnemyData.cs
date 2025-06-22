@@ -4,12 +4,12 @@
 /// </summary>
 public class EnemyData
 {
-    // 更新する可能性大
-    int maxHP;
-    int HP;
-    int attack;
-    int defence;
-    float attack1Mult;
-    float attack2Mult;
-    float attack3Mult;
+    // 敵基礎データ
+    public int maxHP;
+    public int HP;
+    public int attack;
+    public int defence;
+    public float attack1Mult;
+    public float attack2Mult;
+    public float attack3Mult;
 }

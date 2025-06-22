@@ -14,12 +14,11 @@ public partial class EnemyBase : CharacterBase, IDamageable, IPlayerSelectable
     // 基礎データ用のクラス
     protected EnemyData data;
 
-    // 適当なブール
+    // 管理用ブール
     protected bool isInitialized = false;
-    protected bool isAlive = true;
+    protected bool isDead = false;
     protected bool isStunned = false;
     protected bool isHitStunned = false;
-    protected bool isPoisoned = false;
     protected bool isSelected = false;
 
     /// <summary>
@@ -54,10 +53,8 @@ public partial class EnemyBase : CharacterBase, IDamageable, IPlayerSelectable
     /// <summary>
     /// 初期化用
     /// </summary>
-    private void Start()
+    protected void Start()
     {
-        InitData();
-
         stateMachine.Update();
     }
 
