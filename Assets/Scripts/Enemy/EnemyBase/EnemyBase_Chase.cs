@@ -1,10 +1,10 @@
-using IceMilkTea.Core;
+﻿using IceMilkTea.Core;
 using UnityEngine;
 
 public partial class EnemyBase
 {
     /// <summary>
-    /// ???????
+    /// 追従用ステート
     /// </summary>
     private class EnemyBase_Chase : ImtStateMachine<EnemyBase>.State
     {

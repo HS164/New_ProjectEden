@@ -9,7 +9,7 @@ using UnityEngine;
 /// </summary>
 public partial class EnemyBase : CharacterBase, IDamageable, IPlayerSelectable
 {
-    protected ImtStateMachine<EnemyBase> stateMachine;
+    private ImtStateMachine<EnemyBase> stateMachine;
 
     // 基礎データ用のクラス
     protected EnemyData data;
@@ -21,12 +21,6 @@ public partial class EnemyBase : CharacterBase, IDamageable, IPlayerSelectable
     protected bool isHitStunned = false;
     protected bool isPoisoned = false;
     protected bool isSelected = false;
-
-    /* ---------------------------------------------------
-     * レビュー用のコメント、どっかで消す
-     * このクラスと一緒にあげるステートは大体の敵の構造になるかな、本番では親クラスにはステートマシンは多分入れない
-     * 主にステートマシンの練習として作った感じかな
-     -------------------------------------------------- */
 
     /// <summary>
     /// AIステートの移動ENUM
