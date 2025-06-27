@@ -1,4 +1,17 @@
+using UnityEngine;
+
 public interface IPlayerSelectable
 {
-	bool IsSelected();
+	// 選択先のタイプ
+	public enum SelectType{
+		NONE, // あるだけ
+		GETTABLE, // 取得可能オブジェクト
+		ENEMY // 敵
+	}
+
+    bool IsSelected();
+
+    SelectType GetSelectType();
+
+	Vector3 GetBoundsSize();
 }
