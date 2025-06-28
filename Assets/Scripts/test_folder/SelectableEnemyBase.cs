@@ -3,8 +3,6 @@ using UnityEngine;
 public class SelectableEnemyBase : MonoBehaviour , IPlayerSelectable
 {
     protected IPlayerSelectable.SelectType selectType = IPlayerSelectable.SelectType.NONE;
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     protected void Start()
     {
         selectType = IPlayerSelectable.SelectType.ENEMY;

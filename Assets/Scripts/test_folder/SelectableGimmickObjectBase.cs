@@ -5,8 +5,6 @@ using UnityEngine;
 public class SelectableGimmickObjectBase : MonoBehaviour , IPlayerSelectable
 {
     protected IPlayerSelectable.SelectType selectType = IPlayerSelectable.SelectType.NONE;
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     protected void Start()
     {
         selectType = IPlayerSelectable.SelectType.GIMMICK;
