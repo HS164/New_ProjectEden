@@ -1,26 +1,21 @@
-using DocumentFormat.OpenXml.Math;
 using UnityEngine;
 
 // 取得可能なオブジェクトのベースクラス
 // これを継承させる
-public class GettableObjectBase : MonoBehaviour , IPlayerSelectable
+public class SelectableGimmickObjectBase : MonoBehaviour , IPlayerSelectable
 {
-    private static readonly string TAG = "GettableObjectBase >> ";
-
     protected IPlayerSelectable.SelectType selectType = IPlayerSelectable.SelectType.NONE;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     protected void Start()
     {
-        Debug.Log(TAG + "Start()");
-        selectType = IPlayerSelectable.SelectType.GETTABLE;
+        selectType = IPlayerSelectable.SelectType.GIMMICK;
     }
 
     // インターフェースメソッド
     // 選択可能かどうかを返すメソッド
     public bool IsSelected()
     {
-        Debug.Log(TAG + "IsSelected()");
         // 戻り値は動的に変えれるようにする？
         return true;
     }
@@ -29,7 +24,6 @@ public class GettableObjectBase : MonoBehaviour , IPlayerSelectable
     // 自分のタイプを返却
     public IPlayerSelectable.SelectType GetSelectType()
     {
-        Debug.Log(TAG + "GetSelectType(). selectType : " + selectType);
         return selectType;
     }
 
@@ -45,7 +39,6 @@ public class GettableObjectBase : MonoBehaviour , IPlayerSelectable
             boundsSize = renderer.bounds.size;
         }
 
-        Debug.Log(TAG + "boundsSize : " + boundsSize);
         return boundsSize;
     }
 }

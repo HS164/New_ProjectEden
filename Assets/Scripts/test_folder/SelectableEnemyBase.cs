@@ -1,15 +1,12 @@
 using UnityEngine;
 
-public class EnemyBase : MonoBehaviour , IPlayerSelectable
+public class SelectableEnemyBase : MonoBehaviour , IPlayerSelectable
 {
-    private static readonly string TAG = "EnemyBase >> ";
-
     protected IPlayerSelectable.SelectType selectType = IPlayerSelectable.SelectType.NONE;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     protected void Start()
     {
-        Debug.Log(TAG + "Start()");
         selectType = IPlayerSelectable.SelectType.ENEMY;
     }
 
@@ -17,7 +14,6 @@ public class EnemyBase : MonoBehaviour , IPlayerSelectable
     // 選択可能かどうかを返すメソッド
     public bool IsSelected()
     {
-        Debug.Log(TAG + "IsSelected()");
         // 戻り値は動的に変えれるようにする？
         return true;
     }
@@ -26,7 +22,6 @@ public class EnemyBase : MonoBehaviour , IPlayerSelectable
     // 自分のタイプを返却
     public IPlayerSelectable.SelectType GetSelectType()
     {
-        Debug.Log(TAG + "GetSelectType(). selectType : " + selectType);
         return selectType;
     }
 
@@ -42,7 +37,6 @@ public class EnemyBase : MonoBehaviour , IPlayerSelectable
             boundsSize = renderer.bounds.size;
         }
 
-        Debug.Log(TAG + "boundsSize : " + boundsSize);
         return boundsSize;
     }
 }

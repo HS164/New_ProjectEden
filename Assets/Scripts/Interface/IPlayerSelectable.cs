@@ -5,7 +5,7 @@ public interface IPlayerSelectable
 	// 選択先のタイプ
 	public enum SelectType{
 		NONE, // あるだけ
-		GETTABLE, // 取得可能オブジェクト
+		GIMMICK, // 取得可能オブジェクト
 		ENEMY // 敵
 	}
 
