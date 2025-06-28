@@ -13,25 +13,25 @@ public class EnemyBase : MonoBehaviour , IPlayerSelectable
         selectType = IPlayerSelectable.SelectType.ENEMY;
     }
 
-    // ƒCƒ“ƒ^[ƒtƒF[ƒXƒƒ\ƒbƒh
-    // ‘I‘ğ‰Â”\‚©‚Ç‚¤‚©‚ğ•Ô‚·ƒƒ\ƒbƒh
+    // ã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ãƒ¼ã‚¹ãƒ¡ã‚½ãƒƒãƒ‰
+    // é¸æŠå¯èƒ½ã‹ã©ã†ã‹ã‚’è¿”ã™ãƒ¡ã‚½ãƒƒãƒ‰
     public bool IsSelected()
     {
         Debug.Log(TAG + "IsSelected()");
-        // –ß‚è’l‚Í“®“I‚É•Ï‚¦‚ê‚é‚æ‚¤‚É‚·‚éH
+        // æˆ»ã‚Šå€¤ã¯å‹•çš„ã«å¤‰ãˆã‚Œã‚‹ã‚ˆã†ã«ã™ã‚‹ï¼Ÿ
         return true;
     }
 
-    // ƒCƒ“ƒ^[ƒtƒF[ƒXƒƒ\ƒbƒh
-    // ©•ª‚Ìƒ^ƒCƒv‚ğ•Ô‹p
+    // ã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ãƒ¼ã‚¹ãƒ¡ã‚½ãƒƒãƒ‰
+    // è‡ªåˆ†ã®ã‚¿ã‚¤ãƒ—ã‚’è¿”å´
     public IPlayerSelectable.SelectType GetSelectType()
     {
         Debug.Log(TAG + "GetSelectType(). selectType : " + selectType);
         return selectType;
     }
 
-    // ƒCƒ“ƒ^[ƒtƒF[ƒXƒƒ\ƒbƒh
-    // ©•ª‚Ì•A‚‚³‚ÌƒTƒCƒY‚ğæ“¾
+    // ã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ãƒ¼ã‚¹ãƒ¡ã‚½ãƒƒãƒ‰
+    // è‡ªåˆ†ã®å¹…ã€é«˜ã•ã®ã‚µã‚¤ã‚ºã‚’å–å¾—
     public Vector3 GetBoundsSize()
     {
         var renderer = GetComponent<Renderer>();

@@ -2,16 +2,16 @@ using UnityEngine;
 
 public interface IPlayerSelectable
 {
-	// ‘I‘ğæ‚Ìƒ^ƒCƒv
+	// é¸æŠå…ˆã®ã‚¿ã‚¤ãƒ—
 	public enum SelectType{
-		NONE, // ‚ ‚é‚¾‚¯
-		GETTABLE, // æ“¾‰Â”\ƒIƒuƒWƒFƒNƒg
-		ENEMY // “G
+		NONE, // ã‚ã‚‹ã ã‘
+		GETTABLE, // å–å¾—å¯èƒ½ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
+		ENEMY // æ•µ
 	}
 
-    bool IsSelected();
-
-    SelectType GetSelectType();
+	bool IsSelected();
+	
+	SelectType GetSelectType();
 
 	Vector3 GetBoundsSize();
 }
