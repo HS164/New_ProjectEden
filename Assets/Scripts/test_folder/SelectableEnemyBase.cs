@@ -3,6 +3,7 @@ using UnityEngine;
 public class SelectableEnemyBase : MonoBehaviour , IPlayerSelectable
 {
     protected IPlayerSelectable.SelectType selectType = IPlayerSelectable.SelectType.NONE;
+
     protected void Start()
     {
         selectType = IPlayerSelectable.SelectType.ENEMY;
