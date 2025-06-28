@@ -5,6 +5,7 @@ using UnityEngine;
 public class SelectableGimmickObjectBase : MonoBehaviour , IPlayerSelectable
 {
     protected IPlayerSelectable.SelectType selectType = IPlayerSelectable.SelectType.NONE;
+
     protected void Start()
     {
         selectType = IPlayerSelectable.SelectType.GIMMICK;
