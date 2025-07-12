@@ -1,4 +1,4 @@
 ﻿public interface ICharactorAccessor : IHpAccessor
 {
-    
+
 }
