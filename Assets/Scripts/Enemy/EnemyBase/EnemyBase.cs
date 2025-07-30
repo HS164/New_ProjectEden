@@ -7,7 +7,7 @@ using UnityEngine;
 /// <summary>
 /// エネミーの基礎クラス
 /// </summary>
-public partial class EnemyBase : CharacterBase, IDamageable, IPlayerSelectable
+public partial class EnemyBase : SelectableEnemyBase, IDamageable
 {
     private ImtStateMachine<EnemyBase> stateMachine;
 
@@ -81,13 +81,5 @@ public partial class EnemyBase : CharacterBase, IDamageable, IPlayerSelectable
     public virtual void Damage(float damageValue)
     {
         // なんかダメージ計算
-    }
-
-    /// <summary>
-    /// ISelectableの選択されているかの判定
-    /// </summary>
-    public virtual bool IsSelected()
-    {
-        return isSelected;
     }
 }
