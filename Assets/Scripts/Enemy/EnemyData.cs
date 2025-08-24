@@ -2,6 +2,7 @@
 /// <summary>
 /// 敵の簡単なデータを持つ
 /// </summary>
+[System.Serializable]
 public class EnemyData
 {
     // 敵基礎データ
