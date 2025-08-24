@@ -5,6 +5,7 @@ using Cysharp.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using Cysharp.Threading.Tasks.Triggers;
 
 public partial class EnemyGrunt : EnemyBase
 {
@@ -13,6 +14,9 @@ public partial class EnemyGrunt : EnemyBase
     private NavMeshAgent navAgent;
 
     private GameObject player;
+    [SerializeField] private GameObject attackBox;
+    [SerializeField] private GameObject bulletPrefab;
+    [SerializeField] private Transform bulletShootPoint;
 
     private CancellationTokenSource playerLoseDetectionCts;
 
@@ -20,8 +24,7 @@ public partial class EnemyGrunt : EnemyBase
 
     [SerializeField] private List<Vector3> patrolPointList;
 
-    private Vector3 playerLocation;
-    private Vector2 rangedAttackrange;
+    private Vector3 playerPos;
 
     [SerializeField] private float chaseSpeed = 15;
     [SerializeField] private float patrolSpeed = 10;
@@ -30,17 +33,31 @@ public partial class EnemyGrunt : EnemyBase
     [SerializeField] private float playerSearchTime = 5;
     [SerializeField] private float playerSearchAngle = 120;
 
-    [SerializeField] private float meleeAttackRange;
-    [SerializeField] private float meleeStartRange;
+    [SerializeField] private float meleeAttackTime = 0.8f;
+    [SerializeField] private float rangedAttackDelay = 1.0f;
+    [SerializeField] private float rangedAttackInterval = 0.2f;
+    [SerializeField] private float meleeAttackCooldown = 1.25f;
+    [SerializeField] private float rangedAttackCooldown = 0.75f;
+    [SerializeField] private int rangedAttackCount = 3;
+
+    [SerializeField] private float rangedAttackRange = 5f;
+    [SerializeField] private float meleeAttackRange = 2.5f;
+    [SerializeField] private float meleeStartRange = 1.5f;
 
     [SerializeField] private float playerSearchDistance;
     [SerializeField] private float playerChaseDistance;
     [SerializeField] private float combatStartDistance;
     [SerializeField] private float chaseStartDistance;
 
+    [SerializeField] private float bulletSpeed = 15f;
+    [SerializeField] private int bulletDamage = 5;
+
     private bool playerDetected = false;
     private bool playerInSight = false;
     private bool canPatrol = false;
+    private bool canAttack = true;
+    private bool isAttacking = false;
+    private bool isRangedAttacking = false;
 
     /// <summary>
     /// AIステートの移動ENUM
@@ -112,6 +129,7 @@ public partial class EnemyGrunt : EnemyBase
     {
         player = GameObject.FindWithTag("Player");
         navAgent = GetComponent<NavMeshAgent>();
+        attackBox.SetActive(false);
         isInitialized = true;
         canPatrol = true;
     }
@@ -136,7 +154,7 @@ public partial class EnemyGrunt : EnemyBase
         // プレイヤーの最新のポジションを取得
         if (playerVisible)
         {
-            playerLocation = player.transform.position;
+            playerPos = player.transform.position;
         }
 
         if (playerVisible && !playerInSight)
@@ -148,7 +166,7 @@ public partial class EnemyGrunt : EnemyBase
             playerDetected = true;
             playerInSight = true;
         }
-        else if(!playerVisible && playerInSight)
+        else if (!playerVisible && playerInSight)
         {
             playerLoseDetectionCts?.Cancel();
             playerLoseDetectionCts?.Dispose();
@@ -159,10 +177,63 @@ public partial class EnemyGrunt : EnemyBase
         }
     }
 
+    private void MeleeAttack()
+    {
+        MeleeAttackAnimation().Forget();
+    }
+
+    private void RangedAttack()
+    {
+        RangedAttackAnimation().Forget();
+    }
+
+    private void ShootProjectile()
+    {
+        GameObject bullet = Instantiate(bulletPrefab, bulletShootPoint.position, Quaternion.identity);
+
+        IProjectile projectile = bullet.GetComponent<IProjectile>();
+
+        projectile.Fire(transform.forward, bulletSpeed, bulletDamage);
+    }
+
+    private async UniTaskVoid MeleeAttackAnimation()
+    {
+        isAttacking = true;
+        attackBox.SetActive(true);
+        await UniTask.Delay(TimeSpan.FromSeconds(meleeAttackTime));
+        attackBox.SetActive(false);
+        isAttacking = false;
+        ResetAttackCooldown(meleeAttackCooldown).Forget();
+    }
+
+    private async UniTaskVoid RangedAttackAnimation()
+    {
+        isAttacking = true;
+        isRangedAttacking = true;
+        navAgent.updateRotation = false;
+        await UniTask.Delay(TimeSpan.FromSeconds(rangedAttackDelay));
+        for (int i = 0; i < rangedAttackCount; i++)
+        {
+            await UniTask.Delay(TimeSpan.FromSeconds(rangedAttackInterval));
+            ShootProjectile();
+        }
+        isRangedAttacking = false;
+        navAgent.updateRotation = true;
+        await UniTask.Delay(TimeSpan.FromSeconds(rangedAttackDelay));
+        isAttacking = false;
+        ResetAttackCooldown(rangedAttackCooldown).Forget();
+    }
+
     private async UniTaskVoid ResetPatrol()
     {
         await UniTask.Delay(TimeSpan.FromSeconds(patrolWaitTime));
         canPatrol = true;
+    }
+
+    private async UniTaskVoid ResetAttackCooldown(float attackCooldown)
+    {
+        await UniTask.Delay(TimeSpan.FromSeconds(attackCooldown));
+        canAttack = true;
     }
 
     private async UniTaskVoid ResetPlayerDetection(CancellationToken token)

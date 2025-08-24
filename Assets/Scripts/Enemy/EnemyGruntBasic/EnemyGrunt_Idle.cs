@@ -20,11 +20,13 @@ public partial class EnemyGrunt
             if (Context.playerDetected)
             {
                 Context.stateMachine.SendEvent((int)StateTransition.CHASE);
+                return;
             }
 
             if(Context.canPatrol)
             {
                 Context.stateMachine.SendEvent((int)StateTransition.PATROL);
+                return;
             }
         }
 

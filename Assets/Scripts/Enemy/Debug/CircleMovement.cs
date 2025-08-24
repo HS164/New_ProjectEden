@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class CircleMovement : MonoBehaviour
+public class CircleMovement : MonoBehaviour, IDamageable
 {
     [SerializeField] Vector3 center;
     [SerializeField] float radius;
@@ -8,6 +8,11 @@ public class CircleMovement : MonoBehaviour
 
     Vector3 axis = Vector3.up;
     float angle;
+
+    public void Damage(float damageValue)
+    {
+        Debug.Log("player hit");
+    }
 
     private void FixedUpdate()
     {

@@ -12,7 +12,7 @@ public partial class EnemyBase : SelectableEnemyBase, IDamageable
     private ImtStateMachine<EnemyBase> stateMachine;
 
     // 基礎データ用のクラス
-    protected EnemyData data;
+    [SerializeField] protected EnemyData data;
 
     // 管理用ブール
     protected bool isInitialized = false;
@@ -80,6 +80,6 @@ public partial class EnemyBase : SelectableEnemyBase, IDamageable
     /// <param name="damageValue"></param>
     public virtual void Damage(float damageValue)
     {
-        // なんかダメージ計算
+        Debug.Log("enemy hit");
     }
 }
