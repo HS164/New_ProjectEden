@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class SelectableEnemyBase : MonoBehaviour , IPlayerSelectable
+public abstract class SelectableEnemyBase : MonoBehaviour , IPlayerSelectable
 {
     protected IPlayerSelectable.SelectType selectType = IPlayerSelectable.SelectType.NONE;
 
@@ -9,12 +9,12 @@ public class SelectableEnemyBase : MonoBehaviour , IPlayerSelectable
         selectType = IPlayerSelectable.SelectType.ENEMY;
     }
 
-    // インターフェースメソッド
-    // 選択可能かどうかを返すメソッド
-    public bool IsSelected()
+    /**
+     * 選択候補になっているかどうか
+     */
+    public virtual void RegisterelSectionCandidate(bool selecttion)
     {
-        // 戻り値は動的に変えれるようにする？
-        return true;
+
     }
 
     // インターフェースメソッド
@@ -26,7 +26,7 @@ public class SelectableEnemyBase : MonoBehaviour , IPlayerSelectable
 
     // インターフェースメソッド
     // 自分の幅、高さのサイズを取得
-    public Vector3 GetBoundsSize()
+    public virtual Vector3 GetBoundsSize()
     {
         var renderer = GetComponent<Renderer>();
         Vector3 boundsSize = transform.localScale;
@@ -37,5 +37,33 @@ public class SelectableEnemyBase : MonoBehaviour , IPlayerSelectable
         }
 
         return boundsSize;
+    }
+
+    // インターフェースメソッド
+    // 選択中かどうかの判定
+    public bool IsSelect { get; set; }
+
+    // インターフェースメソッド
+    // 選択時に行う処理
+    public virtual void OnSelect()
+    {
+        if (IsSelect)
+        {
+            // すでに選択時の処理を行っていた場合即時終了
+            return;
+        }
+        IsSelect = true;
+    }
+
+    // インターフェースメソッド
+    // 選択を解除したときに行う処理
+    public virtual void OnRelease()
+    {
+        if (!IsSelect)
+        {
+            // すでに解除時の処理を行っていた場合即時終了
+            return;
+        }
+        IsSelect = false;
     }
 }
