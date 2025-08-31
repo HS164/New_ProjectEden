@@ -9,9 +9,15 @@ public class CircleMovement : MonoBehaviour, IDamageable
     Vector3 axis = Vector3.up;
     float angle;
 
-    public void Damage(float damageValue)
+    public bool Damage(float damageValue)
     {
         Debug.Log("player hit");
+        return false;
+    }
+
+    public void Death()
+    {
+
     }
 
     private void FixedUpdate()

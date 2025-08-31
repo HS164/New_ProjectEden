@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks.Triggers;
+using Unity.VisualScripting;
 
 public partial class EnemyGrunt : EnemyBase
 {
@@ -211,11 +212,11 @@ public partial class EnemyGrunt : EnemyBase
     /// IDamageのダメージ関数、攻撃受けた時用
     /// </summary>
     /// <param name="damageValue"></param>
-    public override void Damage(float damageValue)
+    public override bool Damage(float damageValue)
     {
         if(isDead)
         {
-            return;
+            return isDead;
         }
 
         data.HP -= (int)damageValue;
@@ -235,9 +236,14 @@ public partial class EnemyGrunt : EnemyBase
         {
             isDead = true;
             stateMachine.SendEvent((int)StateTransition.DEAD);
-            DeathMotion().Forget();
-            Debug.Log($"Enemy [{gameObject.name}] died");
         }
+        return isDead;
+    }
+
+    public override void Death()
+    {
+        DeathMotion().Forget();
+        Debug.Log($"Enemy [{gameObject.name}] died");
     }
 
     private void MeleeAttack()
