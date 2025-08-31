@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -50,6 +50,16 @@ public class SelectableObjectManager : MonoBehaviour
         return targetObject;
     }
 
+    public IPlayerSelectable GetBeforeWatched()
+    {
+        return beforeWatched;
+    }
+
+    public IPlayerSelectable GetBeforeSelected()
+    {
+        return beforeSelected;
+    }
+
     // カメラ上のオブジェクトを選択するメソッド
     private Transform SearchCenterTarget()
     {
@@ -90,7 +100,7 @@ public class SelectableObjectManager : MonoBehaviour
                 target = hit.transform;
             }
         }
-        Debug.Log(target.name);
+        //Debug.Log(target.name);
 
         // 現在見ているものを設定する
         var currentWatch = target.GetComponent<IPlayerSelectable>();
