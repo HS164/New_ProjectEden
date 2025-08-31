@@ -12,7 +12,7 @@ public abstract class SelectableGimmickObjectBase : MonoBehaviour, IPlayerSelect
     /**
      * 選択候補になっているかどうか
      */
-    public virtual void RegisterelSectionCandidate(bool selecttion)
+    public virtual void AllowSelection(bool selecttion)
     {
 
         return;

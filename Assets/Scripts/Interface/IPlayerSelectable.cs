@@ -11,7 +11,7 @@ public interface IPlayerSelectable
     }
 
     // 選択候補かどうかの判定
-    void RegisterelSectionCandidate(bool selecttion);
+    void AllowSelection(bool selecttion);
     // 選択タイプを取得するためのメソッド
     SelectType GetSelectType();
     // オブジェクトの幅を取得するためのメソッド

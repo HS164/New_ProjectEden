@@ -70,13 +70,13 @@ public class SelectableObjectManager : MonoBehaviour
         {
             if (beforeWatched != null)
             {
-                beforeWatched.RegisterelSectionCandidate(false);
+                beforeWatched.AllowSelection(false);
                 beforeWatched = null;
             }
             return null;
         }
 
-        float minTergetDistance = float.MaxValue;
+        float minTargetDistance = float.MaxValue;
         Transform target = null;
         // 複数hitしたオブジェクトのうち繰り返し処理で近いものを探す
         foreach (var hit in hits)
@@ -84,9 +84,9 @@ public class SelectableObjectManager : MonoBehaviour
             Vector3 targetScreenPos = Camera.main.WorldToViewportPoint(hit.position);
             float targetDistance = Vector2.Distance(new Vector2(0.5f, 0.5f),
                 new Vector2(targetScreenPos.x, targetScreenPos.y));
-            if (targetDistance < minTergetDistance)
+            if (targetDistance < minTargetDistance)
             {
-                minTergetDistance = targetDistance;
+                minTargetDistance = targetDistance;
                 target = hit.transform;
             }
         }
@@ -120,14 +120,14 @@ public class SelectableObjectManager : MonoBehaviour
         {
             // 前回のオブジェクトと今回のオブジェクトが違う場合
             // 選択候補になっているオブジェクトを入れ替え
-            beforeWatched.RegisterelSectionCandidate(false);
-            nowWatch.RegisterelSectionCandidate(true);
+            beforeWatched.AllowSelection(false);
+            nowWatch.AllowSelection(true);
             beforeWatched = nowWatch;
         }
         else if (beforeWatched == null)
         {
             // 新しくオブジェクトをセット
-            nowWatch.RegisterelSectionCandidate(true);
+            nowWatch.AllowSelection(true);
             beforeWatched = nowWatch;
         }
     }
@@ -145,14 +145,14 @@ public class SelectableObjectManager : MonoBehaviour
         if (nowSelect != null && !nowSelect.IsSelect)
         {
             nowSelect.OnSelect();
-            ReleaceTarget();
+            ReleaseTarget();
             beforeSelected = nowSelect;
         }
         return nowSelect;
     }
 
     // 前回選択時のものを解除する
-    public void ReleaceTarget()
+    public void ReleaseTarget()
     {
         if(beforeSelected == null)
         {
