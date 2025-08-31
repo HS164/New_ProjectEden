@@ -15,8 +15,6 @@ public partial class EnemyGrunt
 
         protected override void Update()
         {
-            // something to lower the timer, unless theres some other function that does that
-
             if (!Context.isStunned)
             {
                 Context.stateMachine.SendEvent((int)StateTransition.IDLE);
