@@ -78,8 +78,14 @@ public partial class EnemyBase : SelectableEnemyBase, IDamageable
     /// IDamageのダメージ関数、攻撃受けた時用
     /// </summary>
     /// <param name="damageValue"></param>
-    public virtual void Damage(float damageValue)
+    public virtual bool Damage(float damageValue)
     {
         Debug.Log("enemy hit");
+        return false;
+    }
+
+    public virtual void Death()
+    {
+
     }
 }
