@@ -1,6 +1,9 @@
 ﻿using Cysharp.Threading.Tasks;
+using System;
 using System.Linq;
+using System.Threading;
 using UnityEngine;
+using UnityEngineInternal;
 
 public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
 {
@@ -9,6 +12,13 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
     [SerializeField] private Transform cameraObj;
     [SerializeField] private float searchRadius = 10f;
     [SerializeField] private float attackRange = 1f;
+
+    // 幻影残身 の値
+    [SerializeField] private GameObject playerShadowPrefab;
+    [SerializeField] private float shadowSpawnInterval = 0.15f;
+    [SerializeField] private float dashSpeed = 1.5f;
+    private bool isDashing = false;
+    private CancellationTokenSource shadowDashCts;
 
     // パラメータ
     private float maxHP = 10f;
@@ -65,6 +75,22 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
             {
                 Jump();
             }
+            if (input.Sprint.WasPressedThisFrame())
+            {
+                Debug.Log("ダッシュ開始");
+
+                isDashing = true;
+                shadowDashCts = new CancellationTokenSource();
+                ShadowDash(shadowDashCts.Token).Forget();
+            }
+            if(input.Sprint.WasReleasedThisFrame())
+            {
+                Debug.Log("ダッシュ中断");
+
+                isDashing = false;
+                shadowDashCts?.Cancel();
+                shadowDashCts?.Dispose();
+            }
         }
         else
         {
@@ -75,6 +101,14 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
             if (input.Jump.WasPressedThisFrame())
             {
                 ReleaseTarget();
+            }
+            if (input.Sprint.WasReleasedThisFrame())
+            {
+                Debug.Log("ダッシュ中断");
+
+                isDashing = false;
+                shadowDashCts?.Cancel();
+                shadowDashCts?.Dispose();
             }
         }
 
@@ -91,6 +125,10 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         var rot = Quaternion.LookRotation(dir);
         /****              ここまで                ****/
         var moveDirection = rot * inputDir;
+        if(isDashing)
+        {
+            moveDirection *= dashSpeed;
+        }        
         rbody.linearVelocity = moveDirection * moveSensitivity;
         transform.rotation = Quaternion.LookRotation(moveDirection);
         //Debug.Log(rbody.linearVelocity);
@@ -208,5 +246,26 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
 
         // SphereCastの立方体を可視化
         Gizmos.DrawWireCube(transform.position + transform.forward, Vector3.one * attackRange);
+    }
+
+    /// <summary>
+    /// 走り状態の時にプレイヤーの残像を作る
+    /// </summary>
+    /// <param name="token"></param>
+    /// <returns></returns>
+    private async UniTaskVoid ShadowDash(CancellationToken token)
+    {
+        try
+        {
+            while (true)
+            {
+                await UniTask.Delay(TimeSpan.FromSeconds(shadowSpawnInterval), cancellationToken: token);
+                Instantiate(playerShadowPrefab, transform.position, transform.rotation);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            Debug.Log("ダッシュ中断");
+        }
     }
 }
