@@ -409,11 +409,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rbody: {fileID: 688690289}
   moveSensitivity: 10
-  rotSensivity: 100
   cameraObj: {fileID: 1509989759}
   searchRadius: 10
   attackRange: 1
-  cameraSensivity: 1000
+  playerShadowPrefab: {fileID: 9080439654648588947, guid: 6e2f4c0d95f6d4b449080e555e9e8407,
+    type: 3}
+  shadowSpawnInterval: 0.15
+  dashSpeed: 1.5
 --- !u!54 &688690289
 Rigidbody:
   m_ObjectHideFlags: 0
