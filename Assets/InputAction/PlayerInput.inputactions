@@ -78,6 +78,15 @@
                     "initialStateCheck": false
                 },
                 {
+                    "name": "AirAccele",
+                    "type": "Button",
+                    "id": "e343672a-18d0-4a0d-98a8-ab3a2de517d7",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "Sprint",
                     "type": "Button",
                     "id": "988aafcb-4dc9-4f49-9b3a-183fe452227f",
@@ -459,6 +468,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Attack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "9013f770-b9ec-4642-8d96-e7470c25c170",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "AirAccele",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

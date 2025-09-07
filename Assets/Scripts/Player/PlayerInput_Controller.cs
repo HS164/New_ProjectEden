@@ -164,6 +164,15 @@ public partial class @PlayerInput_Controller: IInputActionCollection2, IDisposab
                     ""initialStateCheck"": false
                 },
                 {
+                    ""name"": ""AirAccele"",
+                    ""type"": ""Button"",
+                    ""id"": ""e343672a-18d0-4a0d-98a8-ab3a2de517d7"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
                     ""name"": ""Sprint"",
                     ""type"": ""Button"",
                     ""id"": ""988aafcb-4dc9-4f49-9b3a-183fe452227f"",
@@ -550,6 +559,17 @@ public partial class @PlayerInput_Controller: IInputActionCollection2, IDisposab
                 },
                 {
                     ""name"": """",
+                    ""id"": ""9013f770-b9ec-4642-8d96-e7470c25c170"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""AirAccele"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""b858d402-0d55-481d-9e9b-2a962a2d92d1"",
                     ""path"": ""<Keyboard>/leftShift"",
                     ""interactions"": """",
@@ -574,6 +594,7 @@ public partial class @PlayerInput_Controller: IInputActionCollection2, IDisposab
         m_PlayerInput_Jump = m_PlayerInput.FindAction("Jump", throwIfNotFound: true);
         m_PlayerInput_ReleaseTarget = m_PlayerInput.FindAction("ReleaseTarget", throwIfNotFound: true);
         m_PlayerInput_Attack = m_PlayerInput.FindAction("Attack", throwIfNotFound: true);
+        m_PlayerInput_AirAccele = m_PlayerInput.FindAction("AirAccele", throwIfNotFound: true);
         m_PlayerInput_Sprint = m_PlayerInput.FindAction("Sprint", throwIfNotFound: true);
     }
 
@@ -663,6 +684,7 @@ public partial class @PlayerInput_Controller: IInputActionCollection2, IDisposab
     private readonly InputAction m_PlayerInput_Jump;
     private readonly InputAction m_PlayerInput_ReleaseTarget;
     private readonly InputAction m_PlayerInput_Attack;
+    private readonly InputAction m_PlayerInput_AirAccele;
     private readonly InputAction m_PlayerInput_Sprint;
     /// <summary>
     /// Provides access to input actions defined in input action map "PlayerInput".
@@ -707,6 +729,10 @@ public partial class @PlayerInput_Controller: IInputActionCollection2, IDisposab
         /// Provides access to the underlying input action "PlayerInput/Attack".
         /// </summary>
         public InputAction @Attack => m_Wrapper.m_PlayerInput_Attack;
+        /// <summary>
+        /// Provides access to the underlying input action "PlayerInput/AirAccele".
+        /// </summary>
+        public InputAction @AirAccele => m_Wrapper.m_PlayerInput_AirAccele;
         /// <summary>
         /// Provides access to the underlying input action "PlayerInput/Sprint".
         /// </summary>
@@ -761,6 +787,9 @@ public partial class @PlayerInput_Controller: IInputActionCollection2, IDisposab
             @Attack.started += instance.OnAttack;
             @Attack.performed += instance.OnAttack;
             @Attack.canceled += instance.OnAttack;
+            @AirAccele.started += instance.OnAirAccele;
+            @AirAccele.performed += instance.OnAirAccele;
+            @AirAccele.canceled += instance.OnAirAccele;
             @Sprint.started += instance.OnSprint;
             @Sprint.performed += instance.OnSprint;
             @Sprint.canceled += instance.OnSprint;
@@ -799,6 +828,9 @@ public partial class @PlayerInput_Controller: IInputActionCollection2, IDisposab
             @Attack.started -= instance.OnAttack;
             @Attack.performed -= instance.OnAttack;
             @Attack.canceled -= instance.OnAttack;
+            @AirAccele.started -= instance.OnAirAccele;
+            @AirAccele.performed -= instance.OnAirAccele;
+            @AirAccele.canceled -= instance.OnAirAccele;
             @Sprint.started -= instance.OnSprint;
             @Sprint.performed -= instance.OnSprint;
             @Sprint.canceled -= instance.OnSprint;
@@ -898,6 +930,13 @@ public partial class @PlayerInput_Controller: IInputActionCollection2, IDisposab
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnAttack(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "AirAccele" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnAirAccele(InputAction.CallbackContext context);
         /// <summary>
         /// Method invoked when associated input action "Sprint" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>

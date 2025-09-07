@@ -11,6 +11,9 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
     [SerializeField] private MoveSensitivity moveSensitivity;
     // ジャンプに関するパラメータ
     [SerializeField] private PlayerJump playerJump;
+    // エアアクセルに関するパラメータ
+    [SerializeField] private PlayerAirAccele playerAirAccele;
+
     [SerializeField] private Transform cameraObj;
     [SerializeField] private float searchRadius = 10f;
     [SerializeField] private float attackRange = 1f;
@@ -56,6 +59,7 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         currentHP = maxHP;
         moveSensitivity.Init();
         playerJump.Reset();
+        playerAirAccele.Reset();
     }
 
     private void OnEnable()
@@ -79,12 +83,19 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         if (IsLand())
         {
             playerJump.Reset();
+            playerAirAccele.Reset();
         }
 
+        // プレイヤーが固定されているとき(密着時)
         if (!isFixed)
         {
             if (playerJump.IsJump())
             {
+                if (playerAirAccele.CanAction() && input.AirAccele.WasPressedThisFrame())
+                {
+                    playerAirAccele.CountUpAction();
+                    AirAccele();
+                }
             }
             else
             {
@@ -250,6 +261,13 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         transform.position = warpPos;
         WarpShadow(currentPos, warpPos);
         isFixed = true;
+    }
+
+    private void AirAccele()
+    {
+        var dir = new Vector3(transform.position.x - cameraObj.transform.position.x, 0, transform.position.z - cameraObj.transform.position.z);
+        rbody.AddForce(dir * playerAirAccele.Power, ForceMode.Impulse);
+        transform.rotation = Quaternion.LookRotation(dir);
     }
 
     // ターゲットを取得

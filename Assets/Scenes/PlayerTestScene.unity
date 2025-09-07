@@ -485,6 +485,10 @@ MonoBehaviour:
     jumpPower: 7.5
     maxTimes: 2
     times: 0
+  playerAirAccele:
+    accelePower: 2
+    maxTimes: 1
+    times: 0
   cameraObj: {fileID: 1509989759}
   searchRadius: 10
   attackRange: 1
