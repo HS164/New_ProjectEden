@@ -1,14 +1,14 @@
 ﻿using Cysharp.Threading.Tasks;
 using System;
 using System.Linq;
-using System.Threading;
 using UnityEngine;
-using UnityEngineInternal;
 
 public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
 {
     [SerializeField] private Rigidbody rbody;
     [SerializeField] private float moveSensitivity = 10f;
+    // ジャンプに関するパラメータ
+    [SerializeField] private PlayerJump playerJump;
     [SerializeField] private Transform cameraObj;
     [SerializeField] private float searchRadius = 10f;
     [SerializeField] private float attackRange = 1f;
@@ -52,6 +52,7 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
     {
         Application.targetFrameRate = 30;
         currentHP = maxHP;
+        playerJump.Reset();
     }
 
     private void OnEnable()
@@ -71,15 +72,32 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         {
             return;
         }
+
+        if (IsLand())
+        {
+            playerJump.Reset();
+        }
+
         if (!isFixed)
         {
-            if (input.Move.ReadValue<Vector2>().magnitude > 0.1f)
+            if (playerJump.IsJump())
             {
-                Move();
             }
+            else
+            {
+                if (input.Move.ReadValue<Vector2>().magnitude > 0.1f)
+                {
+                    Move();
+                }
+            }
+
             if (input.Jump.WasPressedThisFrame())
             {
-                Jump();
+                if (playerJump.CanJump())
+                {
+                    playerJump.CountUpJump();
+                    Jump();
+                }
             }
             if (input.Sprint.WasPressedThisFrame())
             {
@@ -104,7 +122,7 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
             {
                 Attack();
             }
-            if (input.Jump.WasPressedThisFrame())
+            if (input.ReleaseTarget.WasPressedThisFrame())
             {
                 ReleaseTarget();
             }
@@ -137,7 +155,7 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         {
             moveDirection *= playerTimeScale / Time.timeScale;
         }
-        rbody.linearVelocity = moveDirection * moveSensitivity;
+        rbody.linearVelocity = new Vector3(moveVelocity.x, rbody.linearVelocity.y, moveVelocity.z);
         transform.rotation = Quaternion.LookRotation(moveDirection);
         //Debug.Log(rbody.linearVelocity);
     }
@@ -177,6 +195,21 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
     private void Jump()
     {
         Debug.Log("Jump");
+        rbody.AddForce(new Vector3(0, playerJump.Power, 0), ForceMode.Impulse);
+    }
+
+    private bool IsLand()
+    {
+        var hits = Physics.BoxCastAll(
+            transform.position - transform.up,
+            Vector3.one,
+            -transform.up,
+            Quaternion.identity,
+            0.01f)
+            .Select(hit => hit.transform)
+            .Where(hit => hit.GetComponent<IPlatformer>() != null)
+            .ToList();
+        return hits.Count > 0;
     }
 
     private void ReleaseTarget()
@@ -258,6 +291,9 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
 
         // SphereCastの立方体を可視化
         Gizmos.DrawWireCube(transform.position + transform.forward, Vector3.one * attackRange);
+
+        // SphereCastの立方体(着地判定)を可視化
+        Gizmos.DrawWireCube(transform.position - transform.up, Vector3.one);
     }
 
     /// <summary>
@@ -283,7 +319,6 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
     /// <summary>
     /// 走り状態の時にプレイヤーの残像を作る
     /// </summary>
-    /// <param name="token"></param>
     /// <returns></returns>
     private async UniTaskVoid TimeShift()
     {
