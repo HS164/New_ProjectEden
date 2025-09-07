@@ -6,7 +6,9 @@ using UnityEngine;
 public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
 {
     [SerializeField] private Rigidbody rbody;
-    [SerializeField] private float moveSensitivity = 10f;
+
+    // 移動速度に関するパラメータ
+    [SerializeField] private MoveSensitivity moveSensitivity;
     // ジャンプに関するパラメータ
     [SerializeField] private PlayerJump playerJump;
     [SerializeField] private Transform cameraObj;
@@ -52,6 +54,7 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
     {
         Application.targetFrameRate = 30;
         currentHP = maxHP;
+        moveSensitivity.Init();
         playerJump.Reset();
     }
 
@@ -155,6 +158,7 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         {
             moveDirection *= playerTimeScale / Time.timeScale;
         }
+        var moveVelocity = moveDirection * moveSensitivity.Sensitivity;
         rbody.linearVelocity = new Vector3(moveVelocity.x, rbody.linearVelocity.y, moveVelocity.z);
         transform.rotation = Quaternion.LookRotation(moveDirection);
         //Debug.Log(rbody.linearVelocity);
@@ -178,6 +182,8 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
             Debug.Log(hit.gameObject.name);
             var damageObj = hit.GetComponent<IDamageable>();
             var death = damageObj.Damage(atk);
+            // スピードリンク発動
+            moveSensitivity.SpeedUp();
             if(death)
             {
                 var selectableObj = hit.GetComponent<IPlayerSelectable>();

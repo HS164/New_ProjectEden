@@ -476,7 +476,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rbody: {fileID: 688690289}
-  moveSensitivity: 10
+  moveSensitivity:
+    max: 30
+    min: 10
+    increaseValue: 1
+    sensitivity: 0
   playerJump:
     jumpPower: 7.5
     maxTimes: 2
