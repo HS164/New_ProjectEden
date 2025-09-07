@@ -20,6 +20,13 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
     private bool isDashing = false;
     private CancellationTokenSource shadowDashCts;
 
+    // タイムシフトステップ　の値
+    [SerializeField] private GameObject timeShiftEffect;
+    [SerializeField] private float timeShiftDuration = 5f;
+    [SerializeField] private float playerTimeScale = 0.85f;
+    [SerializeField] private float shiftTimeScale = 0.5f;
+    private bool isTimeShifting = false;
+
     // パラメータ
     private float maxHP = 10f;
     private float currentHP;
@@ -91,6 +98,10 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
                 shadowDashCts?.Cancel();
                 shadowDashCts?.Dispose();
             }
+            if(Input.GetKeyDown(KeyCode.M) && !isTimeShifting)
+            {
+                ShadowDash().Forget();
+            }
         }
         else
         {
@@ -128,7 +139,11 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         if(isDashing)
         {
             moveDirection *= dashSpeed;
-        }        
+        }
+        if(isTimeShifting)
+        {
+            moveDirection *= playerTimeScale / Time.timeScale;
+        }
         rbody.linearVelocity = moveDirection * moveSensitivity;
         transform.rotation = Quaternion.LookRotation(moveDirection);
         //Debug.Log(rbody.linearVelocity);
@@ -259,7 +274,7 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         {
             while (true)
             {
-                await UniTask.Delay(TimeSpan.FromSeconds(shadowSpawnInterval), cancellationToken: token);
+                await UniTask.Delay(TimeSpan.FromSeconds(shadowSpawnInterval), true, cancellationToken: token);
                 Instantiate(playerShadowPrefab, transform.position, transform.rotation);
             }
         }
@@ -267,5 +282,21 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         {
             Debug.Log("ダッシュ中断");
         }
+    }
+
+    /// <summary>
+    /// 走り状態の時にプレイヤーの残像を作る
+    /// </summary>
+    /// <param name="token"></param>
+    /// <returns></returns>
+    private async UniTaskVoid ShadowDash()
+    {
+        isTimeShifting = true;
+        Time.timeScale = shiftTimeScale;
+        GameObject prefab = Instantiate(timeShiftEffect, transform.position, Quaternion.identity);
+        await UniTask.Delay(TimeSpan.FromSeconds(timeShiftDuration), true);
+        isTimeShifting = false;
+        Time.timeScale = 1.0f;
+        Destroy(prefab);
     }
 }

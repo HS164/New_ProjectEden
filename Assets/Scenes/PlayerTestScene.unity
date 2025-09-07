@@ -416,6 +416,11 @@ MonoBehaviour:
     type: 3}
   shadowSpawnInterval: 0.15
   dashSpeed: 1.5
+  timeShiftEffect: {fileID: 3147790067183538047, guid: 4986a061789d94349ac51b323cbd6805,
+    type: 3}
+  timeShiftDuration: 5
+  playerTimeScale: 0.85
+  shiftTimeScale: 0.5
 --- !u!54 &688690289
 Rigidbody:
   m_ObjectHideFlags: 0
