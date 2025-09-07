@@ -152,7 +152,14 @@ MonoBehaviour:
   rbody: {fileID: 4405027787668058520}
   moveSensitivity: 10
   cameraObj: {fileID: 0}
-  targetObj: {fileID: 0}
-  cameraSensivity: 100
-  inputActions: {fileID: -944628639613478452, guid: 24b450db314dc1a40918551af91db2ef,
+  searchRadius: 10
+  attackRange: 1
+  playerShadowPrefab: {fileID: 9080439654648588947, guid: 6e2f4c0d95f6d4b449080e555e9e8407,
     type: 3}
+  shadowSpawnInterval: 0.15
+  dashSpeed: 1.5
+  timeShiftEffect: {fileID: 3147790067183538047, guid: 4986a061789d94349ac51b323cbd6805,
+    type: 3}
+  timeShiftDuration: 5
+  playerTimeScale: 0.85
+  shiftTimeScale: 0.5
