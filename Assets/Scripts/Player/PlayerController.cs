@@ -12,13 +12,12 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
     [SerializeField] private Transform cameraObj;
     [SerializeField] private float searchRadius = 10f;
     [SerializeField] private float attackRange = 1f;
+    [SerializeField] private float dashSpeed = 1.5f;
 
     // 幻影残身 の値
     [SerializeField] private GameObject playerShadowPrefab;
-    [SerializeField] private float shadowSpawnInterval = 0.15f;
-    [SerializeField] private float dashSpeed = 1.5f;
+    [SerializeField] private float shadowSpawnInterval = 1;
     private bool isDashing = false;
-    private CancellationTokenSource shadowDashCts;
 
     // タイムシフトステップ　の値
     [SerializeField] private GameObject timeShiftEffect;
@@ -87,20 +86,16 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
                 Debug.Log("ダッシュ開始");
 
                 isDashing = true;
-                shadowDashCts = new CancellationTokenSource();
-                ShadowDash(shadowDashCts.Token).Forget();
             }
             if(input.Sprint.WasReleasedThisFrame())
             {
                 Debug.Log("ダッシュ中断");
 
                 isDashing = false;
-                shadowDashCts?.Cancel();
-                shadowDashCts?.Dispose();
             }
             if(Input.GetKeyDown(KeyCode.M) && !isTimeShifting)
             {
-                ShadowDash().Forget();
+                TimeShift().Forget();
             }
         }
         else
@@ -118,8 +113,6 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
                 Debug.Log("ダッシュ中断");
 
                 isDashing = false;
-                shadowDashCts?.Cancel();
-                shadowDashCts?.Dispose();
             }
         }
 
@@ -209,10 +202,14 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
 
     private void Teleportation(Transform targetObj)
     {
+        Vector3 currentPos = transform.position;
+        Vector3 warpPos;
         rbody.linearVelocity = Vector3.zero;
         var dir = new Vector3(targetObj.position.x, 0, targetObj.position.z) - new Vector3(transform.position.x, 0, transform.position.z);
         transform.rotation = Quaternion.LookRotation(dir);
-        transform.position = targetObj.position - dir.normalized;
+        warpPos = targetObj.position - dir.normalized;
+        transform.position = warpPos;
+        WarpShadow(currentPos, warpPos);
         isFixed = true;
     }
 
@@ -264,23 +261,22 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
     }
 
     /// <summary>
-    /// 走り状態の時にプレイヤーの残像を作る
+    /// ワープした際に初期地点とワープ先の間に残像を配置
     /// </summary>
-    /// <param name="token"></param>
-    /// <returns></returns>
-    private async UniTaskVoid ShadowDash(CancellationToken token)
+    /// <param name="startPos"></param>
+    /// <param name="endPos"></param>
+    void WarpShadow(Vector3 startPos, Vector3 endPos) 
     {
-        try
+        Vector3 warpDir = (endPos - startPos).normalized;
+        float distance = Vector3.Distance(startPos, endPos);
+        float spawnDistance = 0;
+        Vector3 spawnPos = Vector3.zero;
+
+        while (spawnDistance < distance)
         {
-            while (true)
-            {
-                await UniTask.Delay(TimeSpan.FromSeconds(shadowSpawnInterval), true, cancellationToken: token);
-                Instantiate(playerShadowPrefab, transform.position, transform.rotation);
-            }
-        }
-        catch (OperationCanceledException)
-        {
-            Debug.Log("ダッシュ中断");
+            spawnPos = startPos + warpDir * spawnDistance;
+            Instantiate(playerShadowPrefab, spawnPos, transform.rotation);
+            spawnDistance += shadowSpawnInterval;
         }
     }
 
@@ -289,7 +285,7 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
     /// </summary>
     /// <param name="token"></param>
     /// <returns></returns>
-    private async UniTaskVoid ShadowDash()
+    private async UniTaskVoid TimeShift()
     {
         isTimeShifting = true;
         Time.timeScale = shiftTimeScale;
