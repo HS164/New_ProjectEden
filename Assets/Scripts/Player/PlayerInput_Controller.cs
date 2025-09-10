@@ -146,9 +146,27 @@ public partial class @PlayerInput_Controller: IInputActionCollection2, IDisposab
                     ""initialStateCheck"": false
                 },
                 {
+                    ""name"": ""ReleaseTarget"",
+                    ""type"": ""Button"",
+                    ""id"": ""34125297-be18-40e5-a1dd-0a7e94ef8d7d"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
                     ""name"": ""Attack"",
                     ""type"": ""Button"",
                     ""id"": ""51c60e22-4375-413c-8b37-26039ad03fbf"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""AirAccele"",
+                    ""type"": ""Button"",
+                    ""id"": ""e343672a-18d0-4a0d-98a8-ab3a2de517d7"",
                     ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
@@ -508,12 +526,45 @@ public partial class @PlayerInput_Controller: IInputActionCollection2, IDisposab
                 },
                 {
                     ""name"": """",
+                    ""id"": ""52a84b77-89a6-4ddc-94fc-7bfa7924d157"",
+                    ""path"": ""<Gamepad>/buttonEast"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ReleaseTarget"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""ce84567d-03c2-4339-899e-ddbef6ae1235"",
+                    ""path"": ""<Keyboard>/space"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ReleaseTarget"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""0b229458-6f4b-4b09-aba2-6ea61c666c19"",
                     ""path"": ""<Mouse>/leftButton"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Attack"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""9013f770-b9ec-4642-8d96-e7470c25c170"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""AirAccele"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -541,7 +592,9 @@ public partial class @PlayerInput_Controller: IInputActionCollection2, IDisposab
         m_PlayerInput_Tilt = m_PlayerInput.FindAction("Tilt", throwIfNotFound: true);
         m_PlayerInput_Interact = m_PlayerInput.FindAction("Interact", throwIfNotFound: true);
         m_PlayerInput_Jump = m_PlayerInput.FindAction("Jump", throwIfNotFound: true);
+        m_PlayerInput_ReleaseTarget = m_PlayerInput.FindAction("ReleaseTarget", throwIfNotFound: true);
         m_PlayerInput_Attack = m_PlayerInput.FindAction("Attack", throwIfNotFound: true);
+        m_PlayerInput_AirAccele = m_PlayerInput.FindAction("AirAccele", throwIfNotFound: true);
         m_PlayerInput_Sprint = m_PlayerInput.FindAction("Sprint", throwIfNotFound: true);
     }
 
@@ -629,7 +682,9 @@ public partial class @PlayerInput_Controller: IInputActionCollection2, IDisposab
     private readonly InputAction m_PlayerInput_Tilt;
     private readonly InputAction m_PlayerInput_Interact;
     private readonly InputAction m_PlayerInput_Jump;
+    private readonly InputAction m_PlayerInput_ReleaseTarget;
     private readonly InputAction m_PlayerInput_Attack;
+    private readonly InputAction m_PlayerInput_AirAccele;
     private readonly InputAction m_PlayerInput_Sprint;
     /// <summary>
     /// Provides access to input actions defined in input action map "PlayerInput".
@@ -667,9 +722,17 @@ public partial class @PlayerInput_Controller: IInputActionCollection2, IDisposab
         /// </summary>
         public InputAction @Jump => m_Wrapper.m_PlayerInput_Jump;
         /// <summary>
+        /// Provides access to the underlying input action "PlayerInput/ReleaseTarget".
+        /// </summary>
+        public InputAction @ReleaseTarget => m_Wrapper.m_PlayerInput_ReleaseTarget;
+        /// <summary>
         /// Provides access to the underlying input action "PlayerInput/Attack".
         /// </summary>
         public InputAction @Attack => m_Wrapper.m_PlayerInput_Attack;
+        /// <summary>
+        /// Provides access to the underlying input action "PlayerInput/AirAccele".
+        /// </summary>
+        public InputAction @AirAccele => m_Wrapper.m_PlayerInput_AirAccele;
         /// <summary>
         /// Provides access to the underlying input action "PlayerInput/Sprint".
         /// </summary>
@@ -718,9 +781,15 @@ public partial class @PlayerInput_Controller: IInputActionCollection2, IDisposab
             @Jump.started += instance.OnJump;
             @Jump.performed += instance.OnJump;
             @Jump.canceled += instance.OnJump;
+            @ReleaseTarget.started += instance.OnReleaseTarget;
+            @ReleaseTarget.performed += instance.OnReleaseTarget;
+            @ReleaseTarget.canceled += instance.OnReleaseTarget;
             @Attack.started += instance.OnAttack;
             @Attack.performed += instance.OnAttack;
             @Attack.canceled += instance.OnAttack;
+            @AirAccele.started += instance.OnAirAccele;
+            @AirAccele.performed += instance.OnAirAccele;
+            @AirAccele.canceled += instance.OnAirAccele;
             @Sprint.started += instance.OnSprint;
             @Sprint.performed += instance.OnSprint;
             @Sprint.canceled += instance.OnSprint;
@@ -753,9 +822,15 @@ public partial class @PlayerInput_Controller: IInputActionCollection2, IDisposab
             @Jump.started -= instance.OnJump;
             @Jump.performed -= instance.OnJump;
             @Jump.canceled -= instance.OnJump;
+            @ReleaseTarget.started -= instance.OnReleaseTarget;
+            @ReleaseTarget.performed -= instance.OnReleaseTarget;
+            @ReleaseTarget.canceled -= instance.OnReleaseTarget;
             @Attack.started -= instance.OnAttack;
             @Attack.performed -= instance.OnAttack;
             @Attack.canceled -= instance.OnAttack;
+            @AirAccele.started -= instance.OnAirAccele;
+            @AirAccele.performed -= instance.OnAirAccele;
+            @AirAccele.canceled -= instance.OnAirAccele;
             @Sprint.started -= instance.OnSprint;
             @Sprint.performed -= instance.OnSprint;
             @Sprint.canceled -= instance.OnSprint;
@@ -842,12 +917,26 @@ public partial class @PlayerInput_Controller: IInputActionCollection2, IDisposab
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnJump(InputAction.CallbackContext context);
         /// <summary>
+        /// Method invoked when associated input action "ReleaseTarget" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnReleaseTarget(InputAction.CallbackContext context);
+        /// <summary>
         /// Method invoked when associated input action "Attack" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
         /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnAttack(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "AirAccele" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnAirAccele(InputAction.CallbackContext context);
         /// <summary>
         /// Method invoked when associated input action "Sprint" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
