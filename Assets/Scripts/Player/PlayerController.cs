@@ -31,6 +31,10 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
     [SerializeField] private float shiftTimeScale = 0.5f;
     private bool isTimeShifting = false;
 
+    // 攻撃後隙の時間
+    [SerializeField] private float attackCoolTime;
+    private PlayerAttackCoolTimer attackableTimer;
+
     // パラメータ
     private float maxHP = 10f;
     private float currentHP;
@@ -60,6 +64,8 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         moveSensitivity.Init();
         playerJump.Reset();
         playerAirAccele.Reset();
+
+        attackableTimer = new PlayerAttackCoolTimer(attackCoolTime);
     }
 
     private void OnEnable()
@@ -149,6 +155,20 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         }
 
         SearchTarget();
+
+        // テストコード
+        // 現実装では段階を上げる処理が入っていないため、
+        // プロトタイプでスキルの起動を行うためのコード
+        // ---------------------------ここから---------------------------
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            attackableTimer.ChangeOverDrive(true);
+        }
+        else if (Input.GetKeyDown(KeyCode.G))
+        {
+            attackableTimer.ChangeOverDrive(false);
+        }
+        // ---------------------------ここまで---------------------------
     }
 
     // プレイヤー移動
@@ -177,6 +197,11 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
 
     private void Attack()
     {
+        if (attackableTimer.nonAttackable)
+        {
+            return;
+        }
+
         Debug.Log("Attack");
         var hits = Physics.BoxCastAll(
             transform.position + transform.forward,
@@ -207,6 +232,9 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
                 damageObj.Death();
             }
         }
+
+        // 攻撃の後隙を開始する
+        attackableTimer.StartAttackCoolDown();
     }
 
     private void Jump()
