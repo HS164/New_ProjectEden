@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class PlayerAttackCoolTimer
 {
-    private float attacableCoolTime;
+    private float attackableCoolTime;
     // 攻撃可能か判定するフラグ
     private bool _nonAttackable = false;
 
@@ -21,7 +21,7 @@ public class PlayerAttackCoolTimer
     // インスタンス生成時に攻撃のクールタイムの時間を設定する
     public PlayerAttackCoolTimer(float time)
     {
-        attacableCoolTime = time;
+        attackableCoolTime = time;
     }
 
     public async void StartAttackCoolDown()
@@ -36,7 +36,7 @@ public class PlayerAttackCoolTimer
         // 攻撃不可フラグをtrue;
         _nonAttackable = true;
 
-        Debug.Log("start attack cool timer. time : " + attacableCoolTime);
+        Debug.Log("start attack cool timer. time : " + attackableCoolTime);
 
         cts?.Dispose();
         cts = new CancellationTokenSource();
@@ -44,7 +44,7 @@ public class PlayerAttackCoolTimer
         try
         {
             // クールタイム分待機する
-            await UniTask.Delay(TimeSpan.FromSeconds(attacableCoolTime), cancellationToken: cts.Token);
+            await UniTask.Delay(TimeSpan.FromSeconds(attackableCoolTime), cancellationToken: cts.Token);
 
             _nonAttackable = false;
             Debug.Log("complete attack cool down");
