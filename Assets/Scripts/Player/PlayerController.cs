@@ -1,4 +1,5 @@
 ﻿using Cysharp.Threading.Tasks;
+using JetBrains.Annotations;
 using System;
 using System.Linq;
 using UnityEngine;
@@ -18,6 +19,9 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
     [SerializeField] private float searchRadius = 10f;
     [SerializeField] private float attackRange = 1f;
     [SerializeField] private float dashSpeed = 1.5f;
+
+    // 武器を拾うシステム
+    [SerializeField] private WeaponManager weaponManager;
 
     // 幻影残身 の値
     [SerializeField] private GameObject playerShadowPrefab;
@@ -218,6 +222,8 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
             Debug.Log(hit.gameObject.name);
             var damageObj = hit.GetComponent<IDamageable>();
             var death = damageObj.Damage(atk);
+            // 神速パワーアップ
+            PlayerPowerManager.Instance.ChargeGauge();
             // スピードリンク発動
             moveSensitivity.SpeedUp();
             if(death)
@@ -276,6 +282,7 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
     public void Death()
     {
         isDead = true;
+        attackableTimer?.OnDestroy();
     }
 
     private void Teleportation(Transform targetObj)
@@ -317,9 +324,17 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         {
             if (target != null)
             {
-                var currentSelect = selectableManager.SelectTarget(target);
+                selectableManager.SelectTarget(target);
                 Teleportation(target);
-                Attack();
+                var weapon = target.GetComponent<IWeaponAccessor>();
+                if (weapon != null)
+                {
+                    weaponManager.ChangeWeapon(weapon);
+                }
+                else
+                {
+                    Attack();
+                }
             }
         }
     }
@@ -355,6 +370,10 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
     /// <param name="endPos"></param>
     void WarpShadow(Vector3 startPos, Vector3 endPos) 
     {
+        if (!PlayerPowerManager.Instance.HasPowerLevel(PlayerPowerEnum.LIGHTNING))
+        {
+            return;
+        }
         Vector3 warpDir = (endPos - startPos).normalized;
         float distance = Vector3.Distance(startPos, endPos);
         float spawnDistance = 0;
@@ -374,6 +393,10 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
     /// <returns></returns>
     private async UniTaskVoid TimeShift()
     {
+        if (!PlayerPowerManager.Instance.HasPowerLevel(PlayerPowerEnum.LIGHTNING))
+        {
+            return;
+        }
         isTimeShifting = true;
         Time.timeScale = shiftTimeScale;
         GameObject prefab = Instantiate(timeShiftEffect, transform.position, Quaternion.identity);
