@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -80,8 +80,13 @@ public class SelectableObjectManager : MonoBehaviour
         {
             if (beforeWatched != null)
             {
-                beforeWatched.AllowSelection(false);
-                beforeWatched = null;
+                if (beforeWatched is UnityEngine.Object obj && obj != null)
+                {
+                    // 非同期処理でオブジェクトが削除された後に参照しようとしてエラーが発生する
+                    // そのため、オブジェクトが削除済みかどうか判定する処理を行う
+                    beforeWatched.AllowSelection(false);
+                    beforeWatched = null;
+                }
             }
             return null;
         }
@@ -126,7 +131,10 @@ public class SelectableObjectManager : MonoBehaviour
     // 選択可能なオブジェクトに対して行う処理
     private void SelectionPrediction(IPlayerSelectable nowWatch)
     {
-        if (beforeWatched != null && beforeWatched != nowWatch)
+        // 前回見ていたオブジェクトが存在しているかの判定
+        bool existBeforeWatched = beforeWatched != null && (beforeWatched is UnityEngine.Object obj && obj != null);
+
+        if (existBeforeWatched && beforeWatched != nowWatch)
         {
             // 前回のオブジェクトと今回のオブジェクトが違う場合
             // 選択候補になっているオブジェクトを入れ替え
@@ -134,7 +142,7 @@ public class SelectableObjectManager : MonoBehaviour
             nowWatch.AllowSelection(true);
             beforeWatched = nowWatch;
         }
-        else if (beforeWatched == null)
+        else if (!existBeforeWatched)
         {
             // 新しくオブジェクトをセット
             nowWatch.AllowSelection(true);

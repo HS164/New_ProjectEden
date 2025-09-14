@@ -14,7 +14,7 @@ public abstract class SelectableGimmickObjectBase : MonoBehaviour, IPlayerSelect
      */
     public virtual void AllowSelection(bool selecttion)
     {
-        transform.parent.GetComponent<MeshRenderer>().material.color = selecttion ? Color.red : new Color32(214, 156, 118, 255);
+        transform.GetComponent<MeshRenderer>().material.color = selecttion ? Color.red : new Color32(214, 156, 118, 255);
     }
 
     // インターフェースメソッド

@@ -1,7 +1,8 @@
-﻿using Cysharp.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
@@ -39,6 +40,11 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
     [SerializeField] private float attackCoolTime;
     private PlayerAttackCoolTimer attackableTimer;
 
+    [SerializeField] private float overDriveTime = 10f;
+    [SerializeField] private float kronoEndTime = 7f;
+    private PlayerKronoEnd kronoEnd;
+    private bool isKronoEnd = false;
+
     // パラメータ
     private float maxHP = 10f;
     private float currentHP;
@@ -69,7 +75,9 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         playerJump.Reset();
         playerAirAccele.Reset();
 
-        attackableTimer = new PlayerAttackCoolTimer(attackCoolTime);
+        attackableTimer = new PlayerAttackCoolTimer(attackCoolTime, overDriveTime);
+        attackableTimer.SetPlayer(this.gameObject.transform);
+        kronoEnd = new PlayerKronoEnd(kronoEndTime);
     }
 
     private void OnEnable()
@@ -161,16 +169,18 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         SearchTarget();
 
         // テストコード
-        // 現実装では段階を上げる処理が入っていないため、
         // プロトタイプでスキルの起動を行うためのコード
         // ---------------------------ここから---------------------------
+        // オーバードライブ
         if (Input.GetKeyDown(KeyCode.F))
         {
-            attackableTimer.ChangeOverDrive(true);
+            ActiveOverDrive();
         }
-        else if (Input.GetKeyDown(KeyCode.G))
+
+        // クロノ・エンド
+        if (Input.GetKeyDown(KeyCode.V))
         {
-            attackableTimer.ChangeOverDrive(false);
+            ActiveKronoEnd();
         }
         // ---------------------------ここまで---------------------------
     }
@@ -192,6 +202,10 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         if(isTimeShifting)
         {
             moveDirection *= playerTimeScale / Time.timeScale;
+        }
+        if(isKronoEnd)
+        {
+            moveDirection *= 1.0f / Time.timeScale;
         }
         var moveVelocity = moveDirection * moveSensitivity.Sensitivity;
         rbody.linearVelocity = new Vector3(moveVelocity.x, rbody.linearVelocity.y, moveVelocity.z);
@@ -283,6 +297,7 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
     {
         isDead = true;
         attackableTimer?.OnDestroy();
+        kronoEnd?.OnDestroy();
     }
 
     private void Teleportation(Transform targetObj)
@@ -404,5 +419,41 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         isTimeShifting = false;
         Time.timeScale = 1.0f;
         Destroy(prefab);
+    }
+
+    // オーバードライブ起動
+    private void ActiveOverDrive()
+    {
+        if (!PlayerPowerManager.Instance.HasPowerLevel(PlayerPowerEnum.GOD))
+        {
+            return;
+        }
+        attackableTimer.ChangeOverDrive();
+    }
+
+    // クロノ・エンド起動
+    private async void ActiveKronoEnd()
+    {
+        Debug.Log("isKronoEnd : " + isKronoEnd);
+        if (!PlayerPowerManager.Instance.HasPowerLevel(PlayerPowerEnum.GOD) || PlayerKronoEnd.GetIsKronoEnd())
+        {
+            // まだ神速の段階ではない、
+            // もしくはスキル使用中であれば即終了
+            return;
+        }
+        isKronoEnd = true;
+
+        // 結果が返ってくるまで待機
+        bool finishKronoEnd = await kronoEnd.StartKronoEnd();
+
+        if (finishKronoEnd)
+        {
+            Debug.Log("finish Krono End");
+            // 終了時、HPの半分のダメージをくらう
+            float damage = currentHP / 2;
+            Damage(damage);
+        }
+
+        isKronoEnd = false;
     }
 }
