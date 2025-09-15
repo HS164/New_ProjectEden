@@ -6,6 +6,8 @@ using UnityEngine;
 public class PlayerAttackCoolTimer
 {
     private float attackableCoolTime;
+    // 効果時間
+    private float overDriveTime;
     // 攻撃可能か判定するフラグ
     private bool _nonAttackable = false;
 
@@ -15,13 +17,14 @@ public class PlayerAttackCoolTimer
     public bool nonAttackable { get { return _nonAttackable; } }
 
     // クールタイム解消用のコレクショントークン
-    private CancellationTokenSource cts;
+    private CancellationTokenSource attackCoolDownCts;
 
     // コンストラクタ
     // インスタンス生成時に攻撃のクールタイムの時間を設定する
-    public PlayerAttackCoolTimer(float time)
+    public PlayerAttackCoolTimer(float attackableCoolTime, float overDriveTime)
     {
-        attackableCoolTime = time;
+        this.attackableCoolTime = attackableCoolTime;
+        this.overDriveTime = overDriveTime;
     }
 
     public async void StartAttackCoolDown()
@@ -33,52 +36,96 @@ public class PlayerAttackCoolTimer
             return;
         }
 
-        // 攻撃不可フラグをtrue;
+        // 攻撃不可フラグをtrueにする
         _nonAttackable = true;
+        // 視覚的にわかりやすくするため色を変える
+        Color originalColor = Color.white;
+        if (player != null)
+        {
+            originalColor = player.transform.GetComponent<MeshRenderer>().sharedMaterial.color;
+            player.transform.GetComponent<MeshRenderer>().sharedMaterial.color = Color.yellow;
+        }
 
         Debug.Log("start attack cool timer. time : " + attackableCoolTime);
 
-        cts?.Dispose();
-        cts = new CancellationTokenSource();
+        attackCoolDownCts?.Dispose();
+        attackCoolDownCts = new CancellationTokenSource();
 
         try
-        {
+        { 
             // クールタイム分待機する
-            await UniTask.Delay(TimeSpan.FromSeconds(attackableCoolTime), cancellationToken: cts.Token);
+            await UniTask.Delay(TimeSpan.FromSeconds(attackableCoolTime), cancellationToken: attackCoolDownCts.Token, ignoreTimeScale: true);
 
             _nonAttackable = false;
             Debug.Log("complete attack cool down");
+            if(player != null)
+            {
+                // 色をもとに戻す
+                player.transform.GetComponent<MeshRenderer>().sharedMaterial.color = originalColor;
+            }
         }
         catch(OperationCanceledException)
         {
             // キャンセルされた場合にはフラグを戻す
             _nonAttackable = false;
             Debug.Log("cancel cool down");
+            if (player != null)
+            {
+                // 色をもとに戻す
+                player.transform.GetComponent<MeshRenderer>().sharedMaterial.color = originalColor;
+            }
         }
         finally
         {
             // キャンセル用のコレクショントークンの初期化
-            cts?.Dispose();
-            cts = null;
+            attackCoolDownCts?.Dispose();
+            attackCoolDownCts = null;
         }
     }
 
-    public void ChangeOverDrive(bool change)
+    public void ChangeOverDrive()
     {
         if (nonAttackable)
         {
             // クールタイム中であればキャンセルしてクールタイムをリセット
             _nonAttackable = false;
-            cts.Cancel();
+            attackCoolDownCts.Cancel();
         }
-        Debug.Log("change to OverDrive State. change = " + change);
+        Debug.Log("change to OverDrive State");
 
-        isOverDrive = change;
+        StartOverDrive().Forget();
+    }
+    
+    // OverDriveの効果時間
+    private async UniTaskVoid StartOverDrive()
+    {
+        if (isOverDrive)
+        {
+            // 既に実行中の場合即座に終了
+            return;
+        }
+        isOverDrive = true;
+        Debug.Log("Start OverDrive");
+
+        await UniTask.Delay(TimeSpan.FromSeconds(overDriveTime), ignoreTimeScale: true);
+        
+        isOverDrive = false;
     }
 
     public void OnDestroy()
     {
-        cts?.Cancel();
-        cts?.Dispose();
+        // 念のため初期化処理
+        attackCoolDownCts?.Cancel();
+        attackCoolDownCts?.Dispose();
     }
+
+    // 攻撃のクールタイム中かどうかわかりやすくするためのコード
+    // -----------------------ここから-----------------------
+    private Transform player;
+
+    public void SetPlayer(Transform player)
+    {
+        this.player = player;
+    }
+    // -----------------------ここまで-----------------------
 }
