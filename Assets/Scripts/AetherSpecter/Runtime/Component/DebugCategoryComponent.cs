@@ -7,7 +7,7 @@ public class DebugCategoryComponent : MonoBehaviour, IDebugAccessor
     private UIDocument uiDocument = null;
 
     public UIDocument SetDocument { set => uiDocument = value; }
-    public Debuginputer SetInputer { set; private get; }
+    public DebugInputer SetInputer { set; private get; }
     public bool IsFocused { get; set; }
 
     public UniTask OnInit()

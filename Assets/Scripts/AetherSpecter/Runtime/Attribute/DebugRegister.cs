@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -7,22 +7,22 @@ using UnityEngine;
 public class DebugRegister
 {
 	/// <summary>
-	/// w’è‘®«‚ğ‚Â IDebugModule ‚ğ‘SƒAƒZƒ“ƒuƒŠ‚©‚çæ“¾‚·‚é”Ä—pŠÖ”B
+	/// æŒ‡å®šå±æ€§ã‚’æŒã¤ IDebugModule ã‚’å…¨ã‚¢ã‚»ãƒ³ãƒ–ãƒªã‹ã‚‰å–å¾—ã™ã‚‹æ±ç”¨é–¢æ•°ã€‚
 	/// </summary>
-	/// <typeparam name="TAttribute">ŒŸõ‘ÎÛ‚Ì‘®«Œ^</typeparam>
-	/// <returns>‘®«‚ğ‚Â IDebugModule ‚Ì—ñ‹“</returns>
+	/// <typeparam name="TAttribute">æ¤œç´¢å¯¾è±¡ã®å±æ€§å‹</typeparam>
+	/// <returns>å±æ€§ã‚’æŒã¤ IDebugModule ã®åˆ—æŒ™</returns>
 	public static IEnumerable<IDebugModule> GetModules<TAttribute>() where TAttribute : Attribute
 	{
 		return AppDomain.CurrentDomain.GetAssemblies()
 			.SelectMany(a => a.GetTypes())
-			.Where(t => t.GetCustomAttribute<TAttribute>() != null) // w’è‘®«‚ğ‚ÂŒ^‚Ì‚İ
-			.Where(t => typeof(IDebugModule).IsAssignableFrom(t))   // IDebugModule ‚ğŒp³‚µ‚Ä‚¢‚é‚©
-			.Select(t => Activator.CreateInstance(t) as IDebugModule) // ƒCƒ“ƒXƒ^ƒ“ƒX‰»
-			.Where(m => m != null); // null ‚ÍœŠO
+			.Where(t => t.GetCustomAttribute<TAttribute>() != null) // æŒ‡å®šå±æ€§ã‚’æŒã¤å‹ã®ã¿
+			.Where(t => typeof(IDebugModule).IsAssignableFrom(t))   // IDebugModule ã‚’ç¶™æ‰¿ã—ã¦ã„ã‚‹ã‹
+			.Select(t => Activator.CreateInstance(t) as IDebugModule) // ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹åŒ–
+			.Where(m => m != null); // null ã¯é™¤å¤–
 	}
 
 	/// <summary>
-	/// SceneDebugOnlyAttribute ‚ª•t—^‚³‚ê‚Ä‚¢‚éDebugModule ‚ğŒŸõ
+	/// SceneDebugOnlyAttribute ãŒä»˜ä¸ã•ã‚Œã¦ã„ã‚‹DebugModule ã‚’æ¤œç´¢
 	/// </summary>
 	public static IEnumerable<IDebugModule> GetSceneOnlyModules<TAttribute>() where TAttribute : Attribute
 	{
@@ -31,7 +31,7 @@ public class DebugRegister
 	}
 
 	/// <summary>
-	/// SceneDebugOnlyAttribute ‚ª•t—^‚³‚ê‚Ä‚¢‚È‚¢ IDebugModule ‚ğŒŸõ
+	/// SceneDebugOnlyAttribute ãŒä»˜ä¸ã•ã‚Œã¦ã„ãªã„ IDebugModule ã‚’æ¤œç´¢
 	/// </summary>
 	public static IEnumerable<IDebugModule> GetNonSceneOnlyModules<TAttribute>() where TAttribute : Attribute
 	{
@@ -40,11 +40,11 @@ public class DebugRegister
 	}
 
 	/// <summary>
-	/// w’è‘®«‚ğ‚Â IDebugModule ‚Ì‚¤‚¿A“Á’è CategoryType ‚Ì‚à‚Ì‚¾‚¯•Ô‚·
+	/// æŒ‡å®šå±æ€§ã‚’æŒã¤ IDebugModule ã®ã†ã¡ã€ç‰¹å®š CategoryType ã®ã‚‚ã®ã ã‘è¿”ã™
 	/// </summary>
 	public static IEnumerable<IDebugModule> GetSubModulesByCategory(CategoryType category)
 	{
-		return GetModules<DebugSubCategoryAttribute>()  // ‚Ü‚¸‚Í”Ä—pŠÖ”‚Å‘®«•t‚«ƒ‚ƒWƒ…[ƒ‹æ“¾
+		return GetModules<DebugSubCategoryAttribute>()  // ã¾ãšã¯æ±ç”¨é–¢æ•°ã§å±æ€§ä»˜ããƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«å–å¾—
 			.Where(m =>
 			{
 				var attr = m.GetType().GetCustomAttribute<DebugSubCategoryAttribute>();

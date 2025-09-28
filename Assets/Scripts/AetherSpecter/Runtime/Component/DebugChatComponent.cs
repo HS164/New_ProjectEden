@@ -1,4 +1,4 @@
-using Cysharp.Threading.Tasks;
+ï»¿using Cysharp.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,91 +8,106 @@ using UnityEngine.UIElements;
 
 public class DebugChatComponent : MonoBehaviour, IDebugAccessor
 {
-    [SerializeField]
-    private string TextField_Name = "TextField";
-    [SerializeField]
-    private string Button_Name = "CmdEnter";
+	[SerializeField]
+	private string TextField_Name = "TextField";
+	[SerializeField]
+	private string Button_Name = "CmdEnter";
 
-    private UIDocument uiDocument = null;
-    private TextField textField = null;
-    private Button enterButton = null;
-    private string[] commandParts = null; // ƒRƒ}ƒ“ƒh‚ğ‹ó”’‚Å•ªŠ„‚µ‚½”z—ñ
-    private string commandInput = null; // “ü—Í‚³‚ê‚½ƒRƒ}ƒ“ƒh•¶š—ñ
+	private UIDocument uiDocument = null;
+	private TextField textField = null;
+	private Button enterButton = null;
+	private string[] commandParts = null; // ã‚³ãƒãƒ³ãƒ‰ã‚’ç©ºç™½ã§åˆ†å‰²ã—ãŸé…åˆ—
+	private string commandInput = null; // å…¥åŠ›ã•ã‚ŒãŸã‚³ãƒãƒ³ãƒ‰æ–‡å­—åˆ—
 
-    // ƒLƒƒƒbƒVƒ…—p
-    private List<IDebugModule> cachedDebugModules;
-    private List<IDebugModule> cachedSubModules;
+	// ã‚­ãƒ£ãƒƒã‚·ãƒ¥ç”¨
+	private List<IDebugModule> cachedDebugModules;
+	private List<IDebugModule> cachedSubModules;
 
-    public UIDocument SetDocument { set => uiDocument = value; } // UIDocument ‚ğƒZƒbƒg
-    public Debuginputer SetInputer { get; set; } // “ü—Í‚ğó‚¯æ‚é Debuginputer
-    public bool IsFocused { get; set; } // ƒeƒLƒXƒgƒtƒB[ƒ‹ƒh‚ªƒtƒH[ƒJƒX‚³‚ê‚Ä‚¢‚é‚©
+	public UIDocument SetDocument
+	{
+		set => uiDocument = value;
+	} // UIDocument ã‚’ã‚»ãƒƒãƒˆ
+	public DebugInputer SetInputer
+	{
+		get; set;
+	} // å…¥åŠ›ã‚’å—ã‘å–ã‚‹ Debuginputer
+	public bool IsFocused
+	{
+		get; set;
+	} // ãƒ†ã‚­ã‚¹ãƒˆãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰ãŒãƒ•ã‚©ãƒ¼ã‚«ã‚¹ã•ã‚Œã¦ã„ã‚‹ã‹
 
-    /// <summary>
-    /// ‰Šú‰»ˆ—B•K—v‚ª‚ ‚ê‚Î’Ç‰Á‚Ì‰Šú‰»‚ğs‚¤B
-    /// </summary>
-    public async UniTask OnInit()
-    {
-        await LoadAsyncModules();
-    }
+	/// <summary>
+	/// åˆæœŸåŒ–å‡¦ç†ã€‚å¿…è¦ãŒã‚ã‚Œã°è¿½åŠ ã®åˆæœŸåŒ–ã‚’è¡Œã†ã€‚
+	/// </summary>
+	public async UniTask OnInit()
+	{
+		await LoadAsyncModules();
+	}
 
-    /// <summary>
-    /// –ˆƒtƒŒ[ƒ€ŒÄ‚Î‚ê‚éXVˆ—B
-    /// ƒfƒoƒbƒOƒƒjƒ…[‚ÌŠJ•ÂƒL[‚ğŒŸ’m‚µAUI•\¦‚ÌØ‚è‘Ö‚¦‚ğs‚¤B
-    /// </summary>
-    public UniTask OnUpdate()
-    {
-        if (SetInputer.DebugMenu.Open.WasPressedThisFrame() && !IsFocused)
-        {
-            bool isActive = uiDocument.gameObject.activeSelf;
-            uiDocument.gameObject.SetActive(!isActive);
+	/// <summary>
+	/// æ¯ãƒ•ãƒ¬ãƒ¼ãƒ å‘¼ã°ã‚Œã‚‹æ›´æ–°å‡¦ç†ã€‚
+	/// ãƒ‡ãƒãƒƒã‚°ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã®é–‹é–‰ã‚­ãƒ¼ã‚’æ¤œçŸ¥ã—ã€UIè¡¨ç¤ºã®åˆ‡ã‚Šæ›¿ãˆã‚’è¡Œã†ã€‚
+	/// </summary>
+	public UniTask OnUpdate()
+	{
+		if(SetInputer.DebugMenu.Open.WasPressedThisFrame() && !IsFocused)
+		{
+			bool isActive = uiDocument.gameObject.activeSelf;
+			uiDocument.gameObject.SetActive(!isActive);
 
-            if (!isActive)
-            {
-                SetupTextFieldCallbacks();
-                SetupEnterButton();
-            }
-        }
+			if(!isActive)
+			{
+				SetupTextFieldCallbacks();
+				SetupEnterButton();
+			}
+		}
 
-        if (SetInputer.DebugMenu.Close.WasPressedThisFrame())
-        {
-            uiDocument.gameObject.SetActive(false);
-            ReleasedModules();
-            IsFocused = false;
-        }
-        return UniTask.CompletedTask;
-    }
+		if(SetInputer.DebugMenu.Close.WasPressedThisFrame())
+		{
+			uiDocument.gameObject.SetActive(false);
+			ReleasedModules();
+			IsFocused = false;
+		}
+		return UniTask.CompletedTask;
+	}
 
-    /// <summary>
-    /// “ü—Í‚³‚ê‚½ƒRƒ}ƒ“ƒh‚ğ‰ğÍ‚µ‚Ä‘Î‰‚·‚éƒfƒoƒbƒOƒ‚ƒWƒ…[ƒ‹‚ğÀs‚·‚éB
-    /// </summary>
-    public UniTask OnExecute()
-    {
-        // “ü—ÍƒRƒ}ƒ“ƒh‚É‘Î‰‚·‚éƒƒCƒ“ƒ‚ƒWƒ…[ƒ‹
-        IDebugModule mainModule = cachedDebugModules.FirstOrDefault(
-            m => string.Equals(m.ModuleName, commandParts[0], StringComparison.OrdinalIgnoreCase));
+	/// <summary>
+	/// å…¥åŠ›ã•ã‚ŒãŸã‚³ãƒãƒ³ãƒ‰ã‚’è§£æã—ã¦å¯¾å¿œã™ã‚‹ãƒ‡ãƒãƒƒã‚°ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã‚’å®Ÿè¡Œã™ã‚‹ã€‚
+	/// </summary>
+	public UniTask OnExecute()
+	{
+		// å…¥åŠ›ã‚³ãƒãƒ³ãƒ‰ã«å¯¾å¿œã™ã‚‹ãƒ¡ã‚¤ãƒ³ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«
+		IDebugModule mainModule = cachedDebugModules.FirstOrDefault(
+			m => string.Equals(m.ModuleName, commandParts[0], StringComparison.OrdinalIgnoreCase));
 
-        if (mainModule == null) return UniTask.CompletedTask;
+		if(mainModule == null)
+		{
+			return UniTask.CompletedTask;
+		}
 
-        // ƒTƒuƒ‚ƒWƒ…[ƒ‹ŒŸõ
-        IDebugModule subModule = cachedSubModules.FirstOrDefault(
-            m => string.Equals(m.ModuleName, commandParts[1], StringComparison.OrdinalIgnoreCase));
+		// ã‚µãƒ–ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«æ¤œç´¢
+		IDebugModule subModule = cachedSubModules.FirstOrDefault(
+			m => string.Equals(m.ModuleName, commandParts[1], StringComparison.OrdinalIgnoreCase));
 
-        if (subModule == null) return UniTask.CompletedTask;
+		if(subModule == null)
+		{
+			return UniTask.CompletedTask;
+		}
 
-        subModule.Execute();
-        textField.value = "";
-        return UniTask.CompletedTask;
-    }
+		subModule.Execute();
+		textField.value = "";
+		return UniTask.CompletedTask;
+	}
 
-    /// <summary>
-    /// ƒeƒLƒXƒgƒtƒB[ƒ‹ƒh‚ÌƒtƒH[ƒJƒXó‘Ô‚¨‚æ‚Ñ“ü—Í’l‚Ì•ÏX‚ğŠÄ‹‚·‚éƒR[ƒ‹ƒoƒbƒN‚ğİ’è‚·‚éB
-    /// </summary>
-    public UniTask SetupTextFieldCallbacks()
-    {
+	/// <summary>
+	/// ãƒ†ã‚­ã‚¹ãƒˆãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰ã®ãƒ•ã‚©ãƒ¼ã‚«ã‚¹çŠ¶æ…‹ãŠã‚ˆã³å…¥åŠ›å€¤ã®å¤‰æ›´ã‚’ç›£è¦–ã™ã‚‹ã‚³ãƒ¼ãƒ«ãƒãƒƒã‚¯ã‚’è¨­å®šã™ã‚‹ã€‚
+	/// </summary>
+	public UniTask SetupTextFieldCallbacks()
+	{
 		textField = uiDocument.rootVisualElement.Q<TextField>(TextField_Name);
 		if(textField == null)
 		{
-			Debug.LogError("TextField ‚ª‚Ü‚¾‘¶İ‚µ‚Ü‚¹‚ñ");
+			Debug.LogError("TextField ãŒã¾ã å­˜åœ¨ã—ã¾ã›ã‚“");
 			return UniTask.CompletedTask;
 		}
 
@@ -110,14 +125,14 @@ public class DebugChatComponent : MonoBehaviour, IDebugAccessor
 		{
 			if(evt.keyCode == KeyCode.Return || evt.keyCode == KeyCode.KeypadEnter)
 			{
-				// ÅV‚Ì“ü—Í’l‚ğ‘¦æ“¾itext ‚ğg‚¤j
+				// æœ€æ–°ã®å…¥åŠ›å€¤ã‚’å³æ™‚å–å¾—ï¼ˆtext ã‚’ä½¿ã†ï¼‰
 				commandInput = textField.text;
 
-				// ‡@u/v‚©‚çn‚Ü‚ç‚È‚¢ê‡‚Í–³‹
+				// â‘ ã€Œ/ã€ã‹ã‚‰å§‹ã¾ã‚‰ãªã„å ´åˆã¯ç„¡è¦–
 				if(!commandInput.StartsWith("/"))
 					return;
 
-				// ‡Au/v‚ğœ‚¢‚ÄƒRƒ}ƒ“ƒh–¼‚Æˆø”‚ğ•ª—£
+				// â‘¡ã€Œ/ã€ã‚’é™¤ã„ã¦ã‚³ãƒãƒ³ãƒ‰åã¨å¼•æ•°ã‚’åˆ†é›¢
 				string[] parts = commandInput.Substring(1)
 					.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
@@ -126,17 +141,17 @@ public class DebugChatComponent : MonoBehaviour, IDebugAccessor
 					string commandName = parts[0];
 					string[] args = parts.Skip(1).ToArray();
 
-					// ‚±‚±‚Å commandName / args ‚ğg‚Á‚ÄÀs‚·‚é
-					commandParts = parts; // •K—v‚È‚ç•Û
+					// ã“ã“ã§ commandName / args ã‚’ä½¿ã£ã¦å®Ÿè¡Œã™ã‚‹
+					commandParts = parts; // å¿…è¦ãªã‚‰ä¿æŒ
 				}
 
-				// ƒRƒ}ƒ“ƒhÀs
+				// ã‚³ãƒãƒ³ãƒ‰å®Ÿè¡Œ
 				OnExecute().Forget();
 
-				// “ü—Í—“‚ğƒNƒŠƒAiƒ}ƒCƒNƒ‰•—j
+				// å…¥åŠ›æ¬„ã‚’ã‚¯ãƒªã‚¢ï¼ˆãƒã‚¤ã‚¯ãƒ©é¢¨ï¼‰
 				textField.value = string.Empty;
 
-				// Enter ‚ÌŠù’è“®ìi‰üsj‚ğ~‚ß‚é
+				// Enter ã®æ—¢å®šå‹•ä½œï¼ˆæ”¹è¡Œï¼‰ã‚’æ­¢ã‚ã‚‹
 				evt.StopPropagation();
 			}
 		});
@@ -144,52 +159,52 @@ public class DebugChatComponent : MonoBehaviour, IDebugAccessor
 		textField.RegisterCallback<FocusInEvent>(evt => IsFocused = true);
 		textField.RegisterCallback<FocusOutEvent>(evt => IsFocused = false);
 		return UniTask.CompletedTask;
-    }
+	}
 
 	/// <summary>
-	/// Enterƒ{ƒ^ƒ“‚ª‰Ÿ‚³‚ê‚½‚Æ‚«‚ÌƒRƒ}ƒ“ƒhÀsˆ—‚ğİ’è‚·‚éB
+	/// Enterãƒœã‚¿ãƒ³ãŒæŠ¼ã•ã‚ŒãŸã¨ãã®ã‚³ãƒãƒ³ãƒ‰å®Ÿè¡Œå‡¦ç†ã‚’è¨­å®šã™ã‚‹ã€‚
 	/// </summary>
 	public UniTask SetupEnterButton()
-    {
-        enterButton = uiDocument.rootVisualElement.Q<Button>(Button_Name);
-        if (enterButton == null)
-        {
-            Debug.LogError("CmdEnter ‚ª‚Ü‚¾‘¶İ‚µ‚Ü‚¹‚ñ");
-            return UniTask.CompletedTask;
-        }
+	{
+		enterButton = uiDocument.rootVisualElement.Q<Button>(Button_Name);
+		if(enterButton == null)
+		{
+			Debug.LogError("CmdEnter ãŒã¾ã å­˜åœ¨ã—ã¾ã›ã‚“");
+			return UniTask.CompletedTask;
+		}
 
-        enterButton.RegisterCallback<PointerUpEvent>(evt =>
-        {
-            commandParts = commandInput.Split(' ');
-            OnExecute().Forget();
-        });
-        return UniTask.CompletedTask;
-    }
+		enterButton.RegisterCallback<PointerUpEvent>(evt =>
+		{
+			commandParts = commandInput.Split(' ');
+			OnExecute().Forget();
+		});
+		return UniTask.CompletedTask;
+	}
 
-    /// <summary>
-    /// ‘SƒAƒZƒ“ƒuƒŠ‚©‚çƒ‚ƒWƒ…[ƒ‹‚ğ“Ç‚İ‚İ
-    /// </summary>
-    /// <returns></returns>
-    private UniTask LoadAsyncModules()
-    {
-        if (cachedDebugModules == null)
-        {
-            cachedDebugModules = DebugRegister.GetModules<DebugCategoryAttribute>().ToList();
-        }
+	/// <summary>
+	/// å…¨ã‚¢ã‚»ãƒ³ãƒ–ãƒªã‹ã‚‰ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã‚’èª­ã¿è¾¼ã¿
+	/// </summary>
+	/// <returns></returns>
+	private UniTask LoadAsyncModules()
+	{
+		if(cachedDebugModules == null)
+		{
+			cachedDebugModules = DebugRegister.GetModules<DebugCategoryAttribute>().ToList();
+		}
 
-        if (cachedSubModules == null)
-        {
-            cachedSubModules = DebugRegister.GetModules<DebugSubCategoryAttribute>().ToList();
-        }
-        return UniTask.CompletedTask;
-    }
+		if(cachedSubModules == null)
+		{
+			cachedSubModules = DebugRegister.GetModules<DebugSubCategoryAttribute>().ToList();
+		}
+		return UniTask.CompletedTask;
+	}
 
-    /// <summary>
-    /// ƒ‚ƒWƒ…[ƒ‹‚Ì‰ğ•ú
-    /// </summary>
-    private void ReleasedModules()
-    {
-        cachedDebugModules = null;
-        cachedSubModules = null;
-    }
+	/// <summary>
+	/// ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã®è§£æ”¾
+	/// </summary>
+	private void ReleasedModules()
+	{
+		cachedDebugModules = null;
+		cachedSubModules = null;
+	}
 }

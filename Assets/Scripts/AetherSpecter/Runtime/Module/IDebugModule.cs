@@ -1,24 +1,24 @@
-using Cysharp.Threading.Tasks;
+ï»¿using Cysharp.Threading.Tasks;
 
 public interface IDebugModule
 {
     /// <summary>
-    /// ƒ‚ƒWƒ…[ƒ‹‚Ì
+    /// ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã®
     /// </summary>
     public string ModuleID { get; }
 
     /// <summary>
-    /// ƒ‚ƒWƒ…[ƒ‹‚Ì•\¦–¼
+    /// ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã®è¡¨ç¤ºå
     /// </summary>
     public string ModuleName { get; }
 
     /// <summary>
-    /// ƒ‚ƒWƒ…[ƒ‹‚Ìà–¾
+    /// ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã®èª¬æ˜
     /// </summary>
     public string Description { get; }
 
     /// <summary>
-    /// Às
+    /// å®Ÿè¡Œ
     /// </summary>
     public UniTask Execute();
 }

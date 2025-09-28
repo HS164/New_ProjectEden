@@ -1,29 +1,29 @@
-public enum CategoryType
+ï»¿public enum CategoryType
 {
 	System,
 
 	/// <summary>
-	/// ƒtƒF[ƒh‹@”\
+	/// ãƒ•ã‚§ãƒ¼ãƒ‰æ©Ÿèƒ½
 	/// </summary>
 	Fade,
 
 	/// <summary>
-	/// ƒV[ƒ“‹@”\
+	/// ã‚·ãƒ¼ãƒ³æ©Ÿèƒ½
 	/// </summary>
 	Scene,
 
 	/// <summary>
-	/// ADV‹@”\
+	/// ADVæ©Ÿèƒ½
 	/// </summary>
 	ADV,
 
 	/// <summary>
-	/// ƒLƒ‹‹@”\
+	/// ã‚­ãƒ«æ©Ÿèƒ½
 	/// </summary>
 	Kill,
 
 	/// <summary>
-	/// ƒvƒŒƒCƒ„[‹@”\
+	/// ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼æ©Ÿèƒ½
 	/// </summary>
 	Character,
 

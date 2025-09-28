@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false)]
 public class SceneDebugOnlyAttribute : Attribute
@@ -14,7 +14,7 @@ public class SceneDebugOnlyAttribute : Attribute
 	//}
 
 	///// <summary>
-	///// Œ»İƒV[ƒ“‚ÉŠÜ‚Ü‚ê‚é‚©‚Ç‚¤‚©”»’è
+	///// ç¾åœ¨ã‚·ãƒ¼ãƒ³ã«å«ã¾ã‚Œã‚‹ã‹ã©ã†ã‹åˆ¤å®š
 	///// </summary>
 	//public bool Contains(SceneName currentScene)
 	//{

@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UIElements;
 
 public class DebugEngine : MonoBehaviour
@@ -6,12 +6,12 @@ public class DebugEngine : MonoBehaviour
     [SerializeField]
     private UIDocument uiDocument = null;
 
-    private Debuginputer Inputer = null;
+    private DebugInputer inputer = null;
     private IDebugAccessor accessor = null;
 
     private void Awake()
     {
-        Inputer = new();
+        inputer = new();
 
         accessor = GetComponent<IDebugAccessor>();
 
@@ -22,7 +22,7 @@ public class DebugEngine : MonoBehaviour
         else return;
 
         accessor.SetDocument = uiDocument;
-        accessor.SetInputer = Inputer;
+        accessor.SetInputer = inputer;
 
         uiDocument.gameObject.SetActive(false);
     }
@@ -35,7 +35,7 @@ public class DebugEngine : MonoBehaviour
         }
     }
 
-    private void OnEnable() => Inputer.DebugMenu.Enable();
-    private void OnDisable() => Inputer.DebugMenu.Disable();
-    private void OnDestroy() => Inputer.Dispose();
+    private void OnEnable() => inputer.DebugMenu.Enable();
+    private void OnDisable() => inputer.DebugMenu.Disable();
+    private void OnDestroy() => inputer.Dispose();
 }

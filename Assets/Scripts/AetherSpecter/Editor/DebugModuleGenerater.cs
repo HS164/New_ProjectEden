@@ -1,4 +1,4 @@
-using UnityEditor;
+ï»¿using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 using System.IO;
@@ -7,11 +7,11 @@ using System.Collections.Generic;
 #if UNITY_EDITOR
 public class DebugModuleGenerater : EditorWindow
 {
-    private TextField m_NameField;
-    private TextField m_FolderPathField;
-    private EnumField m_CategoryField;
-    private TextField m_CategoryDescriptionField;
-    private VisualElement m_SubCategoryListContainer;
+    private TextField nameField;
+    private TextField folderPathField;
+    private EnumField categoryField;
+    private TextField categoryDescriptionField;
+    private VisualElement subCategoryListContainer;
 
     private SubCategoryManager subCategoryManager = new SubCategoryManager();
     private const string PrefKey_LastFolder = "DebugModuleGenerater_LastFolder";
@@ -20,45 +20,45 @@ public class DebugModuleGenerater : EditorWindow
     public static void ShowWindow()
     {
         var wnd = GetWindow<DebugModuleGenerater>();
-        wnd.titleContent = new GUIContent("ƒfƒoƒbƒOƒ‚ƒWƒ…[ƒ‹¶¬ƒc[ƒ‹");
+        wnd.titleContent = new GUIContent("ãƒ‡ãƒãƒƒã‚°ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ç”Ÿæˆãƒ„ãƒ¼ãƒ«");
     }
 
     public void CreateGUI()
     {
         var root = rootVisualElement;
 
-        // •Û‘¶æƒpƒXUI
+        // ä¿å­˜å…ˆãƒ‘ã‚¹UI
         root.Add(CreateFolderSelectionRow());
 
-        // ƒNƒ‰ƒX–¼UI
-        m_NameField = new TextField("ƒNƒ‰ƒX–¼");
-        root.Add(m_NameField);
+        // ã‚¯ãƒ©ã‚¹åUI
+        nameField = new TextField("ã‚¯ãƒ©ã‚¹å");
+        root.Add(nameField);
 
-        // ƒJƒeƒSƒŠUI
-        m_CategoryField = new EnumField("ƒJƒeƒSƒŠ", (CategoryType)0);
-        root.Add(m_CategoryField);
+        // ã‚«ãƒ†ã‚´ãƒªUI
+        categoryField = new EnumField("ã‚«ãƒ†ã‚´ãƒª", (CategoryType)0);
+        root.Add(categoryField);
 
-        // ƒJƒeƒSƒŠà–¾ TextField
-        m_CategoryDescriptionField = new TextField("ƒJƒeƒSƒŠà–¾");
-        m_CategoryDescriptionField.style.marginBottom = 5;
-        m_CategoryDescriptionField.isReadOnly = false; // •ÒW‰Â”\
-        root.Add(m_CategoryDescriptionField);
+        // ã‚«ãƒ†ã‚´ãƒªèª¬æ˜ TextField
+        categoryDescriptionField = new TextField("ã‚«ãƒ†ã‚´ãƒªèª¬æ˜");
+        categoryDescriptionField.style.marginBottom = 5;
+        categoryDescriptionField.isReadOnly = false; // ç·¨é›†å¯èƒ½
+        root.Add(categoryDescriptionField);
 
-        // ƒTƒuƒJƒeƒSƒŠ“ü—ÍUI
+        // ã‚µãƒ–ã‚«ãƒ†ã‚´ãƒªå…¥åŠ›UI
         root.Add(CreateSubCategoryInputRow());
 
-        // ƒTƒuƒJƒeƒSƒŠ•\¦ƒRƒ“ƒeƒi
-        m_SubCategoryListContainer = new VisualElement();
-        m_SubCategoryListContainer.style.flexDirection = FlexDirection.Column;
-        m_SubCategoryListContainer.style.marginTop = 5;
-        root.Add(m_SubCategoryListContainer);
+        // ã‚µãƒ–ã‚«ãƒ†ã‚´ãƒªè¡¨ç¤ºã‚³ãƒ³ãƒ†ãƒŠ
+        subCategoryListContainer = new VisualElement();
+        subCategoryListContainer.style.flexDirection = FlexDirection.Column;
+        subCategoryListContainer.style.marginTop = 5;
+        root.Add(subCategoryListContainer);
         RefreshSubCategoryList();
 
-        // ¶¬ƒ{ƒ^ƒ“
+        // ç”Ÿæˆãƒœã‚¿ãƒ³
         root.Add(CreateGenerateButton());
     }
 
-    #region UI¶¬ƒƒ\ƒbƒh
+    #region UIç”Ÿæˆãƒ¡ã‚½ãƒƒãƒ‰
 
     private VisualElement CreateFolderSelectionRow()
     {
@@ -67,15 +67,15 @@ public class DebugModuleGenerater : EditorWindow
         folderRow.style.alignItems = Align.Center;
 
         string defaultFolder = EditorPrefs.GetString(PrefKey_LastFolder, "Assets");
-        m_FolderPathField = new TextField("•Û‘¶æƒpƒX");
-        m_FolderPathField.value = defaultFolder;
-        m_FolderPathField.isReadOnly = true;
-        m_FolderPathField.style.flexGrow = 1;
-        folderRow.Add(m_FolderPathField);
+        folderPathField = new TextField("ä¿å­˜å…ˆãƒ‘ã‚¹");
+        folderPathField.value = defaultFolder;
+        folderPathField.isReadOnly = true;
+        folderPathField.style.flexGrow = 1;
+        folderRow.Add(folderPathField);
 
         var selectFolderButton = new Button(() =>
         {
-            string selectedPath = EditorUtility.OpenFolderPanel("ƒXƒNƒŠƒvƒg‚Ì•Û‘¶æ‚ğ‘I‘ğ", m_FolderPathField.value, "");
+            string selectedPath = EditorUtility.OpenFolderPanel("ã‚¹ã‚¯ãƒªãƒ—ãƒˆã®ä¿å­˜å…ˆã‚’é¸æŠ", folderPathField.value, "");
             if (string.IsNullOrEmpty(selectedPath)) return;
 
             selectedPath = selectedPath.Replace("\\", "/");
@@ -83,15 +83,15 @@ public class DebugModuleGenerater : EditorWindow
             if (selectedPath.StartsWith(Application.dataPath))
             {
                 string relativePath = "Assets" + selectedPath.Substring(Application.dataPath.Length);
-                m_FolderPathField.value = relativePath;
+                folderPathField.value = relativePath;
                 EditorPrefs.SetString(PrefKey_LastFolder, relativePath);
             }
             else
             {
-                Debug.LogError("ƒGƒ‰[: ‘I‘ğ‚µ‚½ƒtƒHƒ‹ƒ_‚ÍƒvƒƒWƒFƒNƒg‚Ì Assets “à‚É‚µ‚Ä‚­‚¾‚³‚¢B");
+                Debug.LogError("ã‚¨ãƒ©ãƒ¼: é¸æŠã—ãŸãƒ•ã‚©ãƒ«ãƒ€ã¯ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ãƒˆã® Assets å†…ã«ã—ã¦ãã ã•ã„ã€‚");
             }
         })
-        { text = "QÆ..." };
+        { text = "å‚ç…§..." };
         selectFolderButton.style.width = 100;
         selectFolderButton.style.marginLeft = StyleKeyword.Auto;
         folderRow.Add(selectFolderButton);
@@ -105,7 +105,7 @@ public class DebugModuleGenerater : EditorWindow
         row.style.flexDirection = FlexDirection.Row;
         row.style.alignItems = Align.Center;
 
-        var label = new Label("ƒTƒuƒJƒeƒSƒŠ–¼");
+        var label = new Label("ã‚µãƒ–ã‚«ãƒ†ã‚´ãƒªå");
         label.style.width = 100;
         row.Add(label);
 
@@ -123,7 +123,7 @@ public class DebugModuleGenerater : EditorWindow
                 RefreshSubCategoryList();
             }
         })
-        { text = "’Ç‰Á" };
+        { text = "è¿½åŠ " };
         addButton.style.width = 100;
         addButton.style.marginLeft = StyleKeyword.Auto;
         row.Add(addButton);
@@ -135,32 +135,32 @@ public class DebugModuleGenerater : EditorWindow
     {
         return new Button(() =>
         {
-            string moduleName = m_NameField.value;
+            string moduleName = nameField.value;
             if (string.IsNullOrEmpty(moduleName))
             {
-                Debug.LogError("ƒGƒ‰[: ƒ‚ƒWƒ…[ƒ‹–¼‚ª“ü—Í‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB");
+                Debug.LogError("ã‚¨ãƒ©ãƒ¼: ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«åãŒå…¥åŠ›ã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚");
                 return;
             }
 
-            string folderPath = m_FolderPathField.value;
-            var category = (CategoryType)m_CategoryField.value;
-            string categoryDescription = m_CategoryDescriptionField.value;
+            string folderPath = folderPathField.value;
+            var category = (CategoryType)categoryField.value;
+            string categoryDescription = categoryDescriptionField.value;
 
             CreateModuleScript(moduleName, folderPath, category, categoryDescription);
 
-            // “ü—Í—“‚ÆƒŠƒXƒg‚ğ‰Šú‰»
+            // å…¥åŠ›æ¬„ã¨ãƒªã‚¹ãƒˆã‚’åˆæœŸåŒ–
             ResetWindow();
         })
-        { text = "ƒXƒNƒŠƒvƒg‚ğ¶¬" };
+        { text = "ã‚¹ã‚¯ãƒªãƒ—ãƒˆã‚’ç”Ÿæˆ" };
     }
 
     #endregion
 
-    #region ƒTƒuƒJƒeƒSƒŠŠÇ—
+    #region ã‚µãƒ–ã‚«ãƒ†ã‚´ãƒªç®¡ç†
 
     private void RefreshSubCategoryList()
     {
-        m_SubCategoryListContainer.Clear();
+        subCategoryListContainer.Clear();
         var allSubs = subCategoryManager.GetAll();
         for (int i = 0; i < allSubs.Count; i++)
         {
@@ -170,13 +170,13 @@ public class DebugModuleGenerater : EditorWindow
             row.style.alignItems = Align.Center;
             row.style.marginBottom = 2;
 
-            // ¶‘¤ƒ‰ƒxƒ‹‚ğŒÅ’è•‚Å¶‘µ‚¦
+            // å·¦å´ãƒ©ãƒ™ãƒ«ã‚’å›ºå®šå¹…ã§å·¦æƒãˆ
             var label = new Label(sub);
             label.style.width = 100;
             label.style.unityTextAlign = TextAnchor.MiddleLeft;
             row.Add(label);
 
-            // ‹ó‚Ì—v‘f‚ÅƒXƒy[ƒX‚ğŠm•Û
+            // ç©ºã®è¦ç´ ã§ã‚¹ãƒšãƒ¼ã‚¹ã‚’ç¢ºä¿
             var spacer = new VisualElement();
             spacer.style.flexGrow = 1;
             row.Add(spacer);
@@ -187,50 +187,50 @@ public class DebugModuleGenerater : EditorWindow
                 subCategoryManager.RemoveAt(index);
                 RefreshSubCategoryList();
             })
-            { text = "íœ" };
+            { text = "å‰Šé™¤" };
             deleteButton.style.width = 100;
             row.Add(deleteButton);
 
-            m_SubCategoryListContainer.Add(row);
+            subCategoryListContainer.Add(row);
         }
     }
 
     #endregion
 
-    #region ‰Šú‰»
+    #region åˆæœŸåŒ–
 
     private void ResetWindow()
     {
-        m_NameField.value = "";
-        m_CategoryField.value = (CategoryType)0;
-        m_CategoryDescriptionField.value = "";
+        nameField.value = "";
+        categoryField.value = (CategoryType)0;
+        categoryDescriptionField.value = "";
         subCategoryManager.Clear();
         RefreshSubCategoryList();
     }
 
     #endregion
 
-    #region ƒXƒNƒŠƒvƒg¶¬
+    #region ã‚¹ã‚¯ãƒªãƒ—ãƒˆç”Ÿæˆ
 
     private void CreateModuleScript(string moduleName, string folderPath, CategoryType category, string categoryDescription)
     {
         if (!Directory.Exists(folderPath))
         {
             Directory.CreateDirectory(folderPath);
-            Debug.Log("o—ÍæƒtƒHƒ‹ƒ_‚ğì¬‚µ‚Ü‚µ‚½: " + folderPath);
+            Debug.Log("å‡ºåŠ›å…ˆãƒ•ã‚©ãƒ«ãƒ€ã‚’ä½œæˆã—ã¾ã—ãŸ: " + folderPath);
         }
 
         string scriptPath = Path.Combine(folderPath, moduleName + ".cs");
         if (File.Exists(scriptPath))
         {
-            Debug.LogError("ƒGƒ‰[: “¯–¼‚ÌƒXƒNƒŠƒvƒg‚ª‘¶İ‚µ‚Ü‚· ¨ " + scriptPath);
+            Debug.LogError("ã‚¨ãƒ©ãƒ¼: åŒåã®ã‚¹ã‚¯ãƒªãƒ—ãƒˆãŒå­˜åœ¨ã—ã¾ã™ â†’ " + scriptPath);
             return;
         }
 
         string template = GenerateScriptTemplate(moduleName, category, categoryDescription, subCategoryManager.GetAll());
         File.WriteAllText(scriptPath, template);
         AssetDatabase.Refresh();
-        Debug.Log($"ƒXƒNƒŠƒvƒg‚ğ¶¬‚µ‚Ü‚µ‚½: {scriptPath}");
+        Debug.Log($"ã‚¹ã‚¯ãƒªãƒ—ãƒˆã‚’ç”Ÿæˆã—ã¾ã—ãŸ: {scriptPath}");
     }
 
     private string GenerateScriptTemplate(string moduleName, CategoryType category, string categoryDescription, List<string> subCategories)
@@ -273,7 +273,7 @@ public class {subName} : IDebugModule
     public async UniTask Execute()
     {{
         Debug.Log(Description);
-        // ÀÛ‚Ìˆ—‚Í‚±‚±‚É
+        // å®Ÿéš›ã®å‡¦ç†ã¯ã“ã“ã«
     }}
 }}
 
@@ -283,7 +283,7 @@ public class {subName} : IDebugModule
     #endregion
 }
 
-// ƒTƒuƒJƒeƒSƒŠŠÇ—ƒNƒ‰ƒX
+// ã‚µãƒ–ã‚«ãƒ†ã‚´ãƒªç®¡ç†ã‚¯ãƒ©ã‚¹
 public class SubCategoryManager
 {
     private List<string> list = new List<string>();

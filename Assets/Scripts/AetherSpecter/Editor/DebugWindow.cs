@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEditor;
@@ -7,7 +7,7 @@ using UnityEngine.UIElements;
 
 public class DebugWindow : EditorWindow
 {
-	private static DebugWindow instance@= null;
+	private static DebugWindow instance = null;
 	private VisualElement categoryContainer = null;
 	private VisualElement subCategoryContainer = null;
 	private VisualElement addCategoryContainer = null;
@@ -25,12 +25,12 @@ public class DebugWindow : EditorWindow
 	private static void ShowExample()
 	{
 		DebugWindow wnd = GetWindow<DebugWindow>();
-		wnd.titleContent = new GUIContent("ƒfƒoƒbƒO‰æ–Ê");
+		wnd.titleContent = new GUIContent("ãƒ‡ãƒãƒƒã‚°ç”»é¢");
 	}
 
 	private void CreateGUI()
 	{
-		if(instance ==null)
+		if(instance == null)
 		{
 			instance = this;
 		}
@@ -73,7 +73,7 @@ public class DebugWindow : EditorWindow
 			categoryContainer.Add(CategoryElement(ConfigureType.Common));
 		})
 		{
-			text = "‹¤’Ê‹@”\"
+			text = "å…±é€šæ©Ÿèƒ½"
 		};
 
 		var sceneOnlyButton = new Button(() =>
@@ -85,7 +85,7 @@ public class DebugWindow : EditorWindow
 			categoryContainer.Add(CategoryElement(ConfigureType.SceneOnly));
 		})
 		{
-			text = "ƒV[ƒ“‹@”\"
+			text = "ã‚·ãƒ¼ãƒ³æ©Ÿèƒ½"
 		};
 
 		commonButton.style.width = 150;
@@ -105,9 +105,14 @@ public class DebugWindow : EditorWindow
 	private VisualElement CategoryElement(ConfigureType configureType)
 	{
 		if(configureType == ConfigureType.SceneOnly)
+		{
 			cachedDebugModules = DebugRegister.GetSceneOnlyModules<DebugCategoryAttribute>().ToList();
+		}
 		else
+		{
 			cachedDebugModules = DebugRegister.GetNonSceneOnlyModules<DebugCategoryAttribute>().ToList();
+		}
+
 
 		var element = new VisualElement();
 
@@ -147,7 +152,7 @@ public class DebugWindow : EditorWindow
 			{
 				if(!Application.isPlaying)
 				{
-					Debug.LogWarning("ƒGƒfƒBƒ^Ä¶’†‚Å‚Í‚È‚¢‚½‚ß‚ÍƒLƒƒƒ“ƒZƒ‹‚³‚ê‚Ü‚µ‚½");
+					Debug.LogWarning("ã‚¨ãƒ‡ã‚£ã‚¿å†ç”Ÿä¸­ã§ã¯ãªã„ãŸã‚ã¯ã‚­ãƒ£ãƒ³ã‚»ãƒ«ã•ã‚Œã¾ã—ãŸ");
 					return;
 				}
 				addCategoryContainer?.Clear();
