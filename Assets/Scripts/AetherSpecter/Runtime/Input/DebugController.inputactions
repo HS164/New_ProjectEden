@@ -1,5 +1,5 @@
 {
-    "name": "DebugInputer",
+    "name": "DebugController",
     "maps": [
         {
             "name": "DebugMenu",
