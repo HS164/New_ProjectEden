@@ -1,0 +1,20 @@
+{
+    "name": "AetherSpecter.Attribute",
+    "rootNamespace": "",
+    "references": [
+        "GUID:fea79c625ae9e7945a4d23df2c3fe3c5",
+        "GUID:077aabc333818e74692ee39d4444e5f9",
+        "GUID:09a86fdc0892fb2499f620afc88d854b",
+        "GUID:413f94c016c4b2046aecfd584b89c68e",
+        "GUID:b554d85778f7c094783847f023f627f2"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

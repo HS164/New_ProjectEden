@@ -1,0 +1,19 @@
+{
+    "name": "AetherSpecter.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:077aabc333818e74692ee39d4444e5f9",
+        "GUID:09a86fdc0892fb2499f620afc88d854b",
+        "GUID:470f1a6c61a8a9242a42ef88e10faaf1",
+        "GUID:f51ebe6a0ceec4240a699833d6309b23"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

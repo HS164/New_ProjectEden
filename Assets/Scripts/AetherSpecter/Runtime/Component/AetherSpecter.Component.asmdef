@@ -1,0 +1,21 @@
+{
+    "name": "AetherSpecter.Component",
+    "rootNamespace": "",
+    "references": [
+        "GUID:a5b7ae02f99acdd4f80f6dbd8544eff6",
+        "GUID:470f1a6c61a8a9242a42ef88e10faaf1",
+        "GUID:092220b028c12e743a817b5cfdf4ad3c",
+        "GUID:f51ebe6a0ceec4240a699833d6309b23",
+        "GUID:09a86fdc0892fb2499f620afc88d854b",
+        "GUID:75469ad4d38634e559750d17036d5f7c"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

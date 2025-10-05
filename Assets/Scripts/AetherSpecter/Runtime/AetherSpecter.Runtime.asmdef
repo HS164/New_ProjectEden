@@ -1,0 +1,24 @@
+{
+    "name": "AetherSpecter.Runtime",
+    "rootNamespace": "",
+    "references": [
+        "GUID:a5b7ae02f99acdd4f80f6dbd8544eff6",
+        "GUID:092220b028c12e743a817b5cfdf4ad3c",
+        "GUID:f51ebe6a0ceec4240a699833d6309b23"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "Select...",
+            "expression": "",
+            "define": "USE_UNITASK"
+        }
+    ],
+    "noEngineReferences": false
+}

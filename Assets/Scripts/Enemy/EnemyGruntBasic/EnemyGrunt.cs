@@ -19,6 +19,10 @@ public partial class EnemyGrunt : EnemyBase
     [SerializeField] private GameObject bulletPrefab;
     [SerializeField] private Transform bulletShootPoint;
 
+    private AudioSource audioSource;
+    [SerializeField] private AudioClip gunClip;
+    [SerializeField] private AudioClip swordClip;
+
     private CancellationTokenSource playerLoseDetectionCts;
     private CancellationTokenSource damageFlashCts;
 
@@ -159,6 +163,7 @@ public partial class EnemyGrunt : EnemyBase
         navAgent = GetComponent<NavMeshAgent>();
         mesh = GetComponent<MeshRenderer>();
         originalColor = mesh.material.color;
+        audioSource = GetComponent<AudioSource>();
         attackBox.SetActive(false);
         isInitialized = true;
         canPatrol = true;
@@ -315,6 +320,7 @@ public partial class EnemyGrunt : EnemyBase
     {
         isAttacking = true;
         attackBox.SetActive(true);
+        audioSource.PlayOneShot(swordClip);
         await UniTask.Delay(TimeSpan.FromSeconds(meleeAttackTime));
         attackBox.SetActive(false);
         isAttacking = false;
@@ -330,6 +336,7 @@ public partial class EnemyGrunt : EnemyBase
         for (int i = 0; i < rangedAttackCount; i++)
         {
             await UniTask.Delay(TimeSpan.FromSeconds(rangedAttackInterval));
+            audioSource.PlayOneShot(gunClip);
             ShootProjectile();
         }
         isRangedAttacking = false;

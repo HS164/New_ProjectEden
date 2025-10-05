@@ -9,7 +9,12 @@ public class TempAttackCollider : MonoBehaviour
         IDamageable damageable = other.GetComponent<IDamageable>();
         if (damageable != null)
         {
-            damageable.Damage(attackDamage);
+            bool targetDead = false;
+            targetDead = damageable.Damage(attackDamage);
+            if (targetDead)
+            {
+                damageable.Death();
+            }
         }
     }
 }
