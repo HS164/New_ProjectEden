@@ -1,0 +1,65 @@
+{
+    "name": "DebugController",
+    "maps": [
+        {
+            "name": "DebugMenu",
+            "id": "0980075f-6c6f-4dd4-80b2-1eb77199cf18",
+            "actions": [
+                {
+                    "name": "Open",
+                    "type": "Button",
+                    "id": "40d5b1c7-7a73-4263-a941-1cf1a0000457",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Close",
+                    "type": "Button",
+                    "id": "45f45273-3f2a-4f42-a3ea-22bdbfb680ee",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "c3138e02-0a10-4e57-931a-89a585fda0cc",
+                    "path": "<Keyboard>/t",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Open",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "720c5b4e-21a5-49b1-8031-3e892454d35c",
+                    "path": "<Keyboard>/slash",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Open",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "15ab0952-e130-4b93-b5cd-293fb71b6f7c",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Close",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}

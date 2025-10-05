@@ -1,0 +1,3 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/App/Script/System/DebugEngine/Editor/DebugModuleGenerater.uss?fileID=7433441132597879392&amp;guid=d36c954cfb275984b9401b328e87d240&amp;type=3#DebugModuleGenerater" />
+</ui:UXML>
