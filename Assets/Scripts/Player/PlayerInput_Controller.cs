@@ -173,6 +173,33 @@ public partial class @PlayerInput_Controller: IInputActionCollection2, IDisposab
                     ""initialStateCheck"": false
                 },
                 {
+                    ""name"": ""TimeShift"",
+                    ""type"": ""Button"",
+                    ""id"": ""a6103647-4c0a-46cd-92f8-72be726ec3a3"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""OverDrive"",
+                    ""type"": ""Button"",
+                    ""id"": ""a00c9679-5003-49ea-afef-99d8e3e31866"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""ChronoEnd"",
+                    ""type"": ""Button"",
+                    ""id"": ""2d78b7b4-397b-4340-9ec6-2eda3d6b9130"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
                     ""name"": ""Sprint"",
                     ""type"": ""Button"",
                     ""id"": ""988aafcb-4dc9-4f49-9b3a-183fe452227f"",
@@ -570,6 +597,39 @@ public partial class @PlayerInput_Controller: IInputActionCollection2, IDisposab
                 },
                 {
                     ""name"": """",
+                    ""id"": ""cc0240a4-d249-47e0-a326-83cb5d42b21a"",
+                    ""path"": ""<Keyboard>/m"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""TimeShift"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""01419aae-466b-4ae1-b5ac-1c94bf8c579c"",
+                    ""path"": ""<Keyboard>/f"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""OverDrive"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""08e6eb9b-cadb-47c0-b883-2d02f3f82c74"",
+                    ""path"": ""<Keyboard>/v"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ChronoEnd"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""b858d402-0d55-481d-9e9b-2a962a2d92d1"",
                     ""path"": ""<Keyboard>/leftShift"",
                     ""interactions"": """",
@@ -595,6 +655,9 @@ public partial class @PlayerInput_Controller: IInputActionCollection2, IDisposab
         m_PlayerInput_ReleaseTarget = m_PlayerInput.FindAction("ReleaseTarget", throwIfNotFound: true);
         m_PlayerInput_Attack = m_PlayerInput.FindAction("Attack", throwIfNotFound: true);
         m_PlayerInput_AirAccele = m_PlayerInput.FindAction("AirAccele", throwIfNotFound: true);
+        m_PlayerInput_TimeShift = m_PlayerInput.FindAction("TimeShift", throwIfNotFound: true);
+        m_PlayerInput_OverDrive = m_PlayerInput.FindAction("OverDrive", throwIfNotFound: true);
+        m_PlayerInput_ChronoEnd = m_PlayerInput.FindAction("ChronoEnd", throwIfNotFound: true);
         m_PlayerInput_Sprint = m_PlayerInput.FindAction("Sprint", throwIfNotFound: true);
     }
 
@@ -685,6 +748,9 @@ public partial class @PlayerInput_Controller: IInputActionCollection2, IDisposab
     private readonly InputAction m_PlayerInput_ReleaseTarget;
     private readonly InputAction m_PlayerInput_Attack;
     private readonly InputAction m_PlayerInput_AirAccele;
+    private readonly InputAction m_PlayerInput_TimeShift;
+    private readonly InputAction m_PlayerInput_OverDrive;
+    private readonly InputAction m_PlayerInput_ChronoEnd;
     private readonly InputAction m_PlayerInput_Sprint;
     /// <summary>
     /// Provides access to input actions defined in input action map "PlayerInput".
@@ -733,6 +799,18 @@ public partial class @PlayerInput_Controller: IInputActionCollection2, IDisposab
         /// Provides access to the underlying input action "PlayerInput/AirAccele".
         /// </summary>
         public InputAction @AirAccele => m_Wrapper.m_PlayerInput_AirAccele;
+        /// <summary>
+        /// Provides access to the underlying input action "PlayerInput/TimeShift".
+        /// </summary>
+        public InputAction @TimeShift => m_Wrapper.m_PlayerInput_TimeShift;
+        /// <summary>
+        /// Provides access to the underlying input action "PlayerInput/OverDrive".
+        /// </summary>
+        public InputAction @OverDrive => m_Wrapper.m_PlayerInput_OverDrive;
+        /// <summary>
+        /// Provides access to the underlying input action "PlayerInput/ChronoEnd".
+        /// </summary>
+        public InputAction @ChronoEnd => m_Wrapper.m_PlayerInput_ChronoEnd;
         /// <summary>
         /// Provides access to the underlying input action "PlayerInput/Sprint".
         /// </summary>
@@ -790,6 +868,15 @@ public partial class @PlayerInput_Controller: IInputActionCollection2, IDisposab
             @AirAccele.started += instance.OnAirAccele;
             @AirAccele.performed += instance.OnAirAccele;
             @AirAccele.canceled += instance.OnAirAccele;
+            @TimeShift.started += instance.OnTimeShift;
+            @TimeShift.performed += instance.OnTimeShift;
+            @TimeShift.canceled += instance.OnTimeShift;
+            @OverDrive.started += instance.OnOverDrive;
+            @OverDrive.performed += instance.OnOverDrive;
+            @OverDrive.canceled += instance.OnOverDrive;
+            @ChronoEnd.started += instance.OnChronoEnd;
+            @ChronoEnd.performed += instance.OnChronoEnd;
+            @ChronoEnd.canceled += instance.OnChronoEnd;
             @Sprint.started += instance.OnSprint;
             @Sprint.performed += instance.OnSprint;
             @Sprint.canceled += instance.OnSprint;
@@ -831,6 +918,15 @@ public partial class @PlayerInput_Controller: IInputActionCollection2, IDisposab
             @AirAccele.started -= instance.OnAirAccele;
             @AirAccele.performed -= instance.OnAirAccele;
             @AirAccele.canceled -= instance.OnAirAccele;
+            @TimeShift.started -= instance.OnTimeShift;
+            @TimeShift.performed -= instance.OnTimeShift;
+            @TimeShift.canceled -= instance.OnTimeShift;
+            @OverDrive.started -= instance.OnOverDrive;
+            @OverDrive.performed -= instance.OnOverDrive;
+            @OverDrive.canceled -= instance.OnOverDrive;
+            @ChronoEnd.started -= instance.OnChronoEnd;
+            @ChronoEnd.performed -= instance.OnChronoEnd;
+            @ChronoEnd.canceled -= instance.OnChronoEnd;
             @Sprint.started -= instance.OnSprint;
             @Sprint.performed -= instance.OnSprint;
             @Sprint.canceled -= instance.OnSprint;
@@ -937,6 +1033,27 @@ public partial class @PlayerInput_Controller: IInputActionCollection2, IDisposab
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnAirAccele(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "TimeShift" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnTimeShift(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "OverDrive" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnOverDrive(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "ChronoEnd" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnChronoEnd(InputAction.CallbackContext context);
         /// <summary>
         /// Method invoked when associated input action "Sprint" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
