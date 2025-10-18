@@ -87,6 +87,33 @@
                     "initialStateCheck": false
                 },
                 {
+                    "name": "TimeShift",
+                    "type": "Button",
+                    "id": "a6103647-4c0a-46cd-92f8-72be726ec3a3",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "OverDrive",
+                    "type": "Button",
+                    "id": "a00c9679-5003-49ea-afef-99d8e3e31866",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "ChronoEnd",
+                    "type": "Button",
+                    "id": "2d78b7b4-397b-4340-9ec6-2eda3d6b9130",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "Sprint",
                     "type": "Button",
                     "id": "988aafcb-4dc9-4f49-9b3a-183fe452227f",
@@ -479,6 +506,39 @@
                     "processors": "",
                     "groups": "",
                     "action": "AirAccele",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "cc0240a4-d249-47e0-a326-83cb5d42b21a",
+                    "path": "<Keyboard>/m",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "TimeShift",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "01419aae-466b-4ae1-b5ac-1c94bf8c579c",
+                    "path": "<Keyboard>/f",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "OverDrive",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "08e6eb9b-cadb-47c0-b883-2d02f3f82c74",
+                    "path": "<Keyboard>/v",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ChronoEnd",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
