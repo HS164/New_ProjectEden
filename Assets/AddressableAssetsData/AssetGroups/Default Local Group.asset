@@ -13,13 +13,16 @@ MonoBehaviour:
   m_Name: Default Local Group
   m_EditorClassIdentifier: 
   m_GroupName: Default Local Group
-  m_Data:
-    m_SerializedData: []
   m_GUID: f4c63853024a5c34fb5ae8ed9df0baa1
-  m_SerializeEntries: []
+  m_SerializeEntries:
+  - m_GUID: 78878b0f830e53c4dbded9377396dbd7
+    m_Address: Assets/Prefabs/Player/ObjSet.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 846c88e2b25b5b349aedf9e2fb5eb4eb, type: 2}
   m_SchemaSet:
     m_Schemas:
-    - {fileID: 11400000, guid: 1c7d0cf6a5ed6894582700505cb02b9c, type: 2}
     - {fileID: 11400000, guid: 9a4dc24a4fd2258498c438b373fd9c24, type: 2}
+    - {fileID: 11400000, guid: 1c7d0cf6a5ed6894582700505cb02b9c, type: 2}

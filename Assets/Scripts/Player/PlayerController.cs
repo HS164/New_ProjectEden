@@ -1,4 +1,4 @@
-using Cysharp.Threading.Tasks;
+﻿using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
 using System;
 using System.Linq;
@@ -18,7 +18,7 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
 
     [SerializeField] private Transform cameraObj;
     [SerializeField] private float searchRadius = 10f;
-    [SerializeField] private float attackRange = 1f;
+    [SerializeField, ReadOnly] private float attackRange = 1f;
     [SerializeField] private float dashSpeed = 1.5f;
 
     // 武器を拾うシステム
@@ -46,9 +46,9 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
     private bool isKronoEnd = false;
 
     // パラメータ
-    private float maxHP = 10f;
-    private float currentHP;
-    private float atk = 5;
+    [SerializeField] private float maxHP = 10f;
+    [SerializeField, ReadOnly] private float currentHP;
+    [SerializeField, ReadOnly] private float atk = 5;
 
     private bool isFixed = false;
     private bool isDead = false;
@@ -115,12 +115,9 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
                     AirAccele();
                 }
             }
-            else
+            if (input.Move.ReadValue<Vector2>().magnitude > 0.1f)
             {
-                if (input.Move.ReadValue<Vector2>().magnitude > 0.1f)
-                {
-                    Move();
-                }
+                Move();
             }
 
             if (input.Jump.WasPressedThisFrame())
@@ -143,7 +140,7 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
 
                 isDashing = false;
             }
-            if(Input.GetKeyDown(KeyCode.M) && !isTimeShifting)
+            if(input.TimeShift.WasPressedThisFrame() && !isTimeShifting)
             {
                 TimeShift().Forget();
             }
@@ -172,13 +169,13 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         // プロトタイプでスキルの起動を行うためのコード
         // ---------------------------ここから---------------------------
         // オーバードライブ
-        if (Input.GetKeyDown(KeyCode.F))
+        if (input.OverDrive.WasPressedThisFrame())
         {
             ActiveOverDrive();
         }
 
         // クロノ・エンド
-        if (Input.GetKeyDown(KeyCode.V))
+        if (input.ChronoEnd.WasPressedThisFrame())
         {
             ActiveKronoEnd();
         }
@@ -261,10 +258,17 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
     {
         Debug.Log("Jump");
         rbody.AddForce(new Vector3(0, playerJump.Power, 0), ForceMode.Impulse);
+
+        playerJump.DelayGroundJugment().Forget();
     }
 
     private bool IsLand()
     {
+        if(!playerJump.CanGroundJugment())
+        {
+            return false;
+        }
+
         var hits = Physics.BoxCastAll(
             transform.position - transform.up,
             Vector3.one,
@@ -345,6 +349,12 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
                 if (weapon != null)
                 {
                     weaponManager.ChangeWeapon(weapon);
+                    var weaponData = target.GetComponent<SelectableWeaponBase>().GetWeaponData();
+                    if (weaponData != null)
+                    {
+                        atk = weaponData.damage;
+                        attackRange = weaponData.attackRange;
+                    }
                 }
                 else
                 {
