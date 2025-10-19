@@ -259,12 +259,12 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         Debug.Log("Jump");
         rbody.AddForce(new Vector3(0, playerJump.Power, 0), ForceMode.Impulse);
 
-        playerJump.DelayGroundJugment().Forget();
+        playerJump.DelayGroundJudgement().Forget();
     }
 
     private bool IsLand()
     {
-        if(!playerJump.CanGroundJugment())
+        if(!playerJump.CanGroundJudgement())
         {
             return false;
         }
