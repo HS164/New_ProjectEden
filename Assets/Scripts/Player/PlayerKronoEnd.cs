@@ -40,7 +40,8 @@ public class PlayerKronoEnd
         Debug.Log("start KronoEnd");
         // スキル中判定をtrueにする
         isKronoEnd = true;
-        Time.timeScale = 0.01f;
+        // この個所はタイムスケールをいじるのではないようにする。
+        //Time.timeScale = 0.01f;
 
         cts?.Dispose();
         cts = new CancellationTokenSource();
@@ -85,7 +86,7 @@ public class PlayerKronoEnd
     private void ResetTimeScale()
     {
         isKronoEnd = false;
-        Time.timeScale = 1.0f;
+        //Time.timeScale = 1.0f;
     }
 
     public void OnDestroy()

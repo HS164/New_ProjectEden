@@ -8,6 +8,11 @@ using System.Threading;
 using Cysharp.Threading.Tasks.Triggers;
 using Unity.VisualScripting;
 
+struct KronoEndGruntData
+{
+    public bool wasStopped;
+}
+
 public partial class EnemyGrunt : EnemyBase
 {
     ImtStateMachine<EnemyGrunt> stateMachine;
@@ -34,6 +39,8 @@ public partial class EnemyGrunt : EnemyBase
     private Color originalColor;
 
     private Vector3 playerPos;
+
+    private KronoEndGruntData kronoEndData;
 
     [SerializeField] private float chaseSpeed = 15;
     [SerializeField] private float patrolSpeed = 10;
@@ -71,6 +78,7 @@ public partial class EnemyGrunt : EnemyBase
     private bool isAttacking = false;
     private bool isRangedAttacking = false;
     private bool isDamaged = false;
+    private bool isFrozen = false;
 
     /// <summary>
     /// AIステートの移動ENUM
@@ -154,6 +162,22 @@ public partial class EnemyGrunt : EnemyBase
     /// </summary>
     protected new virtual void FixedUpdate()
     {
+        if (PlayerKronoEnd.GetIsKronoEnd() && !isFrozen)
+        {
+            isFrozen = true;
+            kronoEndData.wasStopped = navAgent.isStopped;
+            navAgent.isStopped = true;
+            return;
+        }
+        else if(!PlayerKronoEnd.GetIsKronoEnd() && isFrozen)
+        {
+            isFrozen = false;
+            navAgent.isStopped = kronoEndData.wasStopped;
+        }
+        if(isFrozen)
+        {
+            return;
+        }
         stateMachine.Update();
     }
 
@@ -281,7 +305,7 @@ public partial class EnemyGrunt : EnemyBase
             {
                 elapsed += Time.deltaTime;
                 mesh.material.color = Color.Lerp(Color.red, originalColor, elapsed / damageFlashTime);
-                await UniTask.Yield(cancellationToken: token);
+                await TimeControl.KronoYield(token);
             }
 
             isDamaged = false;
@@ -310,7 +334,7 @@ public partial class EnemyGrunt : EnemyBase
         {
             elapsed += Time.deltaTime;
             mesh.material.color = Color.Lerp(Color.magenta, Color.clear, elapsed / deathFadeTime);
-            await UniTask.Yield();
+            await TimeControl.KronoYield();
         }
 
         Destroy(gameObject);
@@ -321,7 +345,7 @@ public partial class EnemyGrunt : EnemyBase
         isAttacking = true;
         attackBox.SetActive(true);
         audioSource.PlayOneShot(swordClip);
-        await UniTask.Delay(TimeSpan.FromSeconds(meleeAttackTime));
+        await TimeControl.KronoDelay(meleeAttackTime);
         attackBox.SetActive(false);
         isAttacking = false;
         ResetAttackCooldown(meleeAttackCooldown).Forget();
@@ -332,29 +356,29 @@ public partial class EnemyGrunt : EnemyBase
         isAttacking = true;
         isRangedAttacking = true;
         navAgent.updateRotation = false;
-        await UniTask.Delay(TimeSpan.FromSeconds(rangedAttackDelay));
+        await TimeControl.KronoDelay(rangedAttackDelay);
         for (int i = 0; i < rangedAttackCount; i++)
         {
-            await UniTask.Delay(TimeSpan.FromSeconds(rangedAttackInterval));
+            await TimeControl.KronoDelay(rangedAttackInterval);
             audioSource.PlayOneShot(gunClip);
             ShootProjectile();
         }
         isRangedAttacking = false;
         navAgent.updateRotation = true;
-        await UniTask.Delay(TimeSpan.FromSeconds(rangedAttackDelay));
+        await TimeControl.KronoDelay(rangedAttackDelay);
         isAttacking = false;
         ResetAttackCooldown(rangedAttackCooldown).Forget();
     }
 
     private async UniTaskVoid ResetPatrol()
     {
-        await UniTask.Delay(TimeSpan.FromSeconds(patrolWaitTime));
+        await TimeControl.KronoDelay(patrolWaitTime);
         canPatrol = true;
     }
 
     private async UniTaskVoid ResetAttackCooldown(float attackCooldown)
     {
-        await UniTask.Delay(TimeSpan.FromSeconds(attackCooldown));
+        await TimeControl.KronoDelay(attackCooldown);
         canAttack = true;
     }
 
@@ -362,7 +386,7 @@ public partial class EnemyGrunt : EnemyBase
     {
         try
         {
-            await UniTask.Delay(TimeSpan.FromSeconds(playerSearchTime), cancellationToken: token);
+            await TimeControl.KronoDelay(playerSearchTime, token);
             playerDetected = false;
             playerInSight = false;
         }
