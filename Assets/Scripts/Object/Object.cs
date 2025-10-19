@@ -1,16 +1,16 @@
-﻿using DocumentFormat.OpenXml.Office2013.Drawing.Chart;
+using DocumentFormat.OpenXml.Office2013.Drawing.Chart;
 using UnityEngine;
 using static IPlayerSelectable;
 
 public class Object : MonoBehaviour, IPlayerSelectable, IDamageable
 {
-    protected SelectType selectType = SelectType.NONE;
+    protected SelectableType selectType = SelectableType.NONE;
     protected float maxHP = 10f;
     protected float currentHP;
 
     protected void Start()
     {
-        selectType = SelectType.ENEMY;
+        selectType = SelectableType.ENEMY;
         currentHP = maxHP;
     }
 
@@ -24,7 +24,7 @@ public class Object : MonoBehaviour, IPlayerSelectable, IDamageable
 
     // インターフェースメソッド
     // 自分のタイプを返却
-    public SelectType GetSelectType()
+    public SelectableType GetSelectableType()
     {
         return selectType;
     }

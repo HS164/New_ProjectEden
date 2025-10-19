@@ -2,11 +2,11 @@ using UnityEngine;
 
 public abstract class SelectableEnemyBase : MonoBehaviour , IPlayerSelectable
 {
-    protected IPlayerSelectable.SelectType selectType = IPlayerSelectable.SelectType.NONE;
+    protected SelectableType selectType = SelectableType.NONE;
 
     protected void Start()
     {
-        selectType = IPlayerSelectable.SelectType.ENEMY;
+        selectType = SelectableType.ENEMY;
     }
 
     /**
@@ -19,7 +19,7 @@ public abstract class SelectableEnemyBase : MonoBehaviour , IPlayerSelectable
 
     // インターフェースメソッド
     // 自分のタイプを返却
-    public IPlayerSelectable.SelectType GetSelectType()
+    public SelectableType GetSelectableType()
     {
         return selectType;
     }
@@ -41,7 +41,7 @@ public abstract class SelectableEnemyBase : MonoBehaviour , IPlayerSelectable
 
     // インターフェースメソッド
     // 選択中かどうかの判定
-    public bool IsSelect { get; set; }
+    public bool IsSelect { get; protected set; }
 
     // インターフェースメソッド
     // 選択時に行う処理

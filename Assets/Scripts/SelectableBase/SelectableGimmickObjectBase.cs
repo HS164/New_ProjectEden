@@ -1,12 +1,12 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public abstract class SelectableGimmickObjectBase : MonoBehaviour, IPlayerSelectable
 {
-    protected IPlayerSelectable.SelectType selectType = IPlayerSelectable.SelectType.NONE;
+    protected SelectableType selectType = SelectableType.NONE;
 
     protected void Start()
     {
-        selectType = IPlayerSelectable.SelectType.GIMMICK;
+        selectType = SelectableType.GIMMICK;
     }
 
     /**
@@ -19,7 +19,7 @@ public abstract class SelectableGimmickObjectBase : MonoBehaviour, IPlayerSelect
 
     // インターフェースメソッド
     // 自分のタイプを返却
-    public IPlayerSelectable.SelectType GetSelectType()
+    public SelectableType GetSelectableType()
     {
         return selectType;
     }
@@ -41,7 +41,7 @@ public abstract class SelectableGimmickObjectBase : MonoBehaviour, IPlayerSelect
 
     // インターフェースメソッド
     // 選択中かどうかの判定
-    public bool IsSelect { get; set; }
+    public bool IsSelect { get; protected set; }
 
     // インターフェースメソッド
     // 選択時に行う処理
