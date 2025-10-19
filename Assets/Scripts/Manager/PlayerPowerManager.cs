@@ -9,6 +9,11 @@ public class PlayerPowerManager : SingletonBehaviour<PlayerPowerManager>
     [SerializeField] private float lightningPowerUpValue = 50;
     [SerializeField] private float godPowerUpValue = 100;
 
+    private void Start()
+    {
+        SetPowerLevel();
+    }
+
     public void ChargeGauge()
     {
         powerGauge++;
@@ -20,6 +25,7 @@ public class PlayerPowerManager : SingletonBehaviour<PlayerPowerManager>
         if (powerGauge >= godPowerUpValue)
         {
             powerLevel |= PlayerPowerEnum.GOD;
+            powerLevel |= PlayerPowerEnum.LIGHTNING;
         }
         else if (powerGauge >= lightningPowerUpValue)
         {
