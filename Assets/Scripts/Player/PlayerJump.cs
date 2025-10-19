@@ -7,12 +7,12 @@ public class PlayerJump
     [SerializeField] private float jumpPower = 10f;
     [SerializeField] private int maxTimes;
     [SerializeField, ReadOnly] private int times;
-    [SerializeField, ReadOnly] private bool canGroundJudgment = false;
+    [SerializeField, ReadOnly] private bool canGroundJudgement = false;
 
     public void Reset()
     {
         times = 0;
-        canGroundJudgment = false;
+        canGroundJudgement = false;
     }
 
     public bool CanJump()
@@ -35,15 +35,15 @@ public class PlayerJump
         return times > 0;
     }
 
-    public bool CanGroundJudgment()
+    public bool CanGroundJudgement()
     {
-        return canGroundJudgment;
+        return canGroundJudgement;
     }
 
-    public async UniTask DelayGroundJugment()
+    public async UniTask DelayGroundJudgement()
     {
         await UniTask.WaitForSeconds(0.5f);
 
-        canGroundJudgment = true;
+        canGroundJudgement = true;
     }
 }
