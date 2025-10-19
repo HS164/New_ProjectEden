@@ -264,7 +264,7 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
 
     private bool IsLand()
     {
-        if(!playerJump.CanGroundJugment())
+        if(!playerJump.CanGroundJudgment())
         {
             return false;
         }
