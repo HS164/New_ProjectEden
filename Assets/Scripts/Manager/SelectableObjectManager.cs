@@ -112,6 +112,10 @@ public class SelectableObjectManager : MonoBehaviour
         // 現在見ているオブジェクトに対して処理を行う
         SelectionPrediction(currentWatch);
 
+        // ワープ対象の可視化
+        Vector3 dirToTarget = target.transform.position - centerObject.transform.position;
+        Debug.DrawRay(centerObject.transform.position, dirToTarget, Color.yellow);
+
         return target;
     }
 
