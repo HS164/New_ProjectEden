@@ -24,6 +24,9 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
     // 武器を拾うシステム
     [SerializeField] private WeaponManager weaponManager;
 
+    // ワープターゲットを可視化する線
+    [SerializeField] private LineRenderer lineRenderer;
+
     // 幻影残身 の値
     [SerializeField] private GameObject playerShadowPrefab;
     [SerializeField] private float shadowSpawnInterval = 1;
@@ -78,6 +81,13 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         attackableTimer = new PlayerAttackCoolTimer(attackCoolTime, overDriveTime);
         attackableTimer.SetPlayer(this.gameObject.transform);
         kronoEnd = new PlayerKronoEnd(kronoEndTime);
+
+        lineRenderer.positionCount = 2;
+        lineRenderer.startWidth = 0.15f;
+        lineRenderer.endWidth = 0.15f;
+        lineRenderer.startColor = Color.yellow;
+        lineRenderer.endColor = Color.yellow;
+        lineRenderer.enabled = false;
     }
 
     private void OnEnable()
@@ -329,6 +339,18 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         var selectableManager = SelectableObjectManager.instance;
         var target = selectableManager.GetTargetObject();
         bool isInteract = false;
+
+        if (target != null)
+        {
+            lineRenderer.enabled = true;
+            lineRenderer.SetPosition(0, transform.position);
+            lineRenderer.SetPosition(1, target.transform.position);
+        }
+        else
+        {
+            lineRenderer.enabled = false;
+        }
+
         if (isFixed)
         {
             isInteract = input.Interact.WasPressedThisFrame();
