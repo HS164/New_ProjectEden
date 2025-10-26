@@ -187,7 +187,6 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
     {
         var moveAmt = input.Move.ReadValue<Vector2>();
         var inputDir = new Vector3(moveAmt.x, 0, moveAmt.y);
-        // カメラと同期させてはいけない　させると移動中にカメラを動かすとカクカクになる
         var dir = Quaternion.Euler(0, cameraObj.transform.eulerAngles.y, 0);
         var moveDirection = dir * inputDir;
         /****              ここまで                ****/
