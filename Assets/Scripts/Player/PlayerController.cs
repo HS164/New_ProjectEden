@@ -351,6 +351,11 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
             lineRenderer.enabled = false;
         }
 
+        if (attackableTimer.nonAttackable)
+        {
+            return;
+        }
+
         if (isFixed)
         {
             isInteract = input.Interact.WasPressedThisFrame();
