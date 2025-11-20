@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using DocumentFormat.OpenXml.Math;
 using IceMilkTea.Core;
 using UnityEngine;
 using UnityEngine.AI;
@@ -22,11 +21,6 @@ public partial class EnemyGrunt
         {
             Context.CheckPlayerVisible();
 
-            if (Context.playerDetected)
-            {
-                Context.stateMachine.SendEvent((int)StateTransition.CHASE);
-            }
-
             NavMeshAgent agent = Context.navAgent;
             if(!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance)
             {
@@ -35,8 +29,8 @@ public partial class EnemyGrunt
                     Vector3 currentPatrolPoint = Context.patrolPointList.First();
                     Context.patrolPointList.RemoveAt(0);
                     Context.patrolPointList.Add(currentPatrolPoint);
-                    Context.stateMachine.SendEvent((int)StateTransition.IDLE);
-                }
+					Context.UpdateState(EnemyState.IDLE);
+				}
             }
         }
 

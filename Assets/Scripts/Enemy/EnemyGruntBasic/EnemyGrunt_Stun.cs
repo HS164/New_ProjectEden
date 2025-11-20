@@ -17,7 +17,7 @@ public partial class EnemyGrunt
         {
             if (!Context.isStunned)
             {
-                Context.stateMachine.SendEvent((int)StateTransition.IDLE);
+                Context.UpdateState(EnemyState.IDLE);
                 return;
             }
         }

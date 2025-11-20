@@ -7,7 +7,7 @@ using UnityEngine;
 /// <summary>
 /// エネミーの基礎クラス
 /// </summary>
-public partial class EnemyBase : SelectableEnemyBase, IDamageable
+public partial class EnemyBase : SelectableEnemyBase, IDamageable, IEnemy
 {
     private ImtStateMachine<EnemyBase> stateMachine;
 
@@ -24,7 +24,7 @@ public partial class EnemyBase : SelectableEnemyBase, IDamageable
     /// <summary>
     /// AIステートの移動ENUM
     /// </summary>
-    enum StateTransition
+    enum EnemyState
     {
         IDLE,
         PATROL,
@@ -39,13 +39,13 @@ public partial class EnemyBase : SelectableEnemyBase, IDamageable
     private void Awake()
     {
         stateMachine = new ImtStateMachine<EnemyBase>(this);
-        stateMachine.AddTransition<EnemyBase_Init, EnemyBase_Idle>((int)StateTransition.IDLE);
-        stateMachine.AddTransition<EnemyBase_Patrol, EnemyBase_Idle>((int)StateTransition.IDLE);
-        stateMachine.AddTransition<EnemyBase_Chase, EnemyBase_Idle>((int)StateTransition.IDLE);
-        stateMachine.AddTransition<EnemyBase_Idle, EnemyBase_Patrol>((int)StateTransition.PATROL);
-        stateMachine.AddTransition<EnemyBase_Chase, EnemyBase_Patrol>((int)StateTransition.PATROL);
-        stateMachine.AddTransition<EnemyBase_Idle, EnemyBase_Chase>((int)StateTransition.CHASE);
-        stateMachine.AddTransition<EnemyBase_Patrol, EnemyBase_Chase>((int)StateTransition.CHASE);
+        stateMachine.AddTransition<EnemyBase_Init, EnemyBase_Idle>((int)EnemyState.IDLE);
+        stateMachine.AddTransition<EnemyBase_Patrol, EnemyBase_Idle>((int)EnemyState.IDLE);
+        stateMachine.AddTransition<EnemyBase_Chase, EnemyBase_Idle>((int)EnemyState.IDLE);
+        stateMachine.AddTransition<EnemyBase_Idle, EnemyBase_Patrol>((int)EnemyState.PATROL);
+        stateMachine.AddTransition<EnemyBase_Chase, EnemyBase_Patrol>((int)EnemyState.PATROL);
+        stateMachine.AddTransition<EnemyBase_Idle, EnemyBase_Chase>((int)EnemyState.CHASE);
+        stateMachine.AddTransition<EnemyBase_Patrol, EnemyBase_Chase>((int)EnemyState.CHASE);
 
         stateMachine.SetStartState<EnemyBase_Init>();
     }
@@ -87,5 +87,30 @@ public partial class EnemyBase : SelectableEnemyBase, IDamageable
     public virtual void Death()
     {
 
+    }
+
+    public virtual EnemyType GetEnemyType()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public virtual bool IsMeleeAttacking()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public virtual bool IsMeleeState()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public virtual bool InCombat()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public virtual Transform GetTransform()
+    {
+        return transform;
     }
 }

@@ -297,6 +297,7 @@ GameObject:
   - component: {fileID: 9156824099118030442}
   - component: {fileID: 1587710353342842251}
   - component: {fileID: 3541086652266741104}
+  - component: {fileID: 6353104556206204772}
   m_Layer: 11
   m_Name: Enemy
   m_TagString: Untagged
@@ -433,26 +434,27 @@ MonoBehaviour:
   - {x: 10, y: 0, z: -10}
   - {x: -10, y: 0, z: -10}
   - {x: -10, y: 0, z: 10}
-  chaseSpeed: 11
+  enemyType: 3
+  chaseSpeed: 10
+  combatSpeed: 3
   patrolSpeed: 5
   patrolWaitTime: 5
-  playerSearchTime: 5
+  playerSearchTime: 10
   playerSearchAngle: 120
   meleeAttackTime: 1.5
   rangedAttackDelay: 0.5
   rangedAttackInterval: 0.2
-  meleeAttackCooldown: 0.75
-  rangedAttackCooldown: 1.15
+  meleeAttackCooldown: 5
+  rangedAttackCooldown: 10
   rangedAttackCount: 3
   damageFlashTime: 0.25
   deathFadeTime: 1
-  rangedAttackRange: 6
   meleeAttackRange: 2.5
   meleeStartRange: 2
   playerSearchDistance: 15
-  playerChaseDistance: 9
-  combatStartDistance: 5
-  chaseStartDistance: 10
+  combatDetectionDistance: 30
+  meleeCombatRange: 10
+  rangedCombatRange: 20
   bulletSpeed: 15
   bulletDamage: 5
 --- !u!195 &1587710353342842251
@@ -574,3 +576,19 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!208 &6353104556206204772
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7565421987800342656}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 0.5, y: 1, z: 0.5}
+  m_MoveThreshold: 0.1
+  m_Carve: 0
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0, y: 0, z: 0}
+  m_TimeToStationary: 0.5

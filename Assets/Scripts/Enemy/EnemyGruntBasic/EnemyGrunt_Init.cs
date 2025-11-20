@@ -18,8 +18,8 @@ public partial class EnemyGrunt
         {
             if (Context.isInitialized)
             {
-                Context.stateMachine.SendEvent((int)StateTransition.IDLE);
-            }
+				Context.UpdateState(EnemyState.IDLE);
+			}
         }
 
         protected override void Exit()
