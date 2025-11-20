@@ -17,23 +17,28 @@ public partial class EnemyGrunt
         protected override void Update()
         {
             Context.CheckPlayerVisible();
+            Context.navAgent.SetDestination(Context.playerPos);
 
-            // まだ戦闘関連未実装
-            if (Vector3.Distance(Context.transform.position, Context.playerPos) < Context.combatStartDistance)
+            // プレイヤーが見えるまで近づく
+            if (!Context.playerInSight)
             {
-                Context.stateMachine.SendEvent((int)StateTransition.COMBAT);
+                return;
+            }
+
+            // 現在の戦闘状態の戦闘範囲内に到達したらステートを変更する
+            if (Context.meleeState && Vector3.Distance(Context.transform.position, Context.playerPos) < Context.meleeCombatRange - Context.combatRangeHalfLength)
+            {
+				Context.UpdateState(EnemyState.MELEE);
+                Debug.Log("switching to combat");
+                return;
+            }
+            else if (!Context.meleeState && Vector3.Distance(Context.transform.position, Context.playerPos) < Context.rangedCombatRange - Context.combatRangeHalfLength)
+            {
+                Context.UpdateState(EnemyState.RANGED);
                 Debug.Log("switching to combat");
                 return;
             }
 
-            if (!Context.playerDetected)
-            {
-                Context.stateMachine.SendEvent((int)StateTransition.IDLE);
-                Debug.Log("追従停止、アイドルに移動");
-                return;
-            }
-
-            Context.navAgent.SetDestination(Context.playerPos);
         }
 
         protected override void Exit()

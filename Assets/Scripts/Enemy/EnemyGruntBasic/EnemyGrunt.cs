@@ -42,8 +42,12 @@ public partial class EnemyGrunt : EnemyBase
 
     private KronoEndGruntData kronoEndData;
 
+    private EnemyState currentState;
+    [SerializeField] private EnemyType enemyType;
+
     [SerializeField] private float chaseSpeed = 15;
-    [SerializeField] private float patrolSpeed = 10;
+    [SerializeField] private float combatSpeed = 10;
+    [SerializeField] private float patrolSpeed = 8;
 
     [SerializeField] private float patrolWaitTime = 5;
     [SerializeField] private float playerSearchTime = 5;
@@ -59,40 +63,45 @@ public partial class EnemyGrunt : EnemyBase
     [SerializeField] private float damageFlashTime = 0.1f;
     [SerializeField] private float deathFadeTime = 1f;
 
-    [SerializeField] private float rangedAttackRange = 5f;
     [SerializeField] private float meleeAttackRange = 2.5f;
     [SerializeField] private float meleeStartRange = 1.5f;
 
-    [SerializeField] private float playerSearchDistance;
-    [SerializeField] private float playerChaseDistance;
-    [SerializeField] private float combatStartDistance;
-    [SerializeField] private float chaseStartDistance;
+
+    [SerializeField] private float playerSearchDistance = 20f;
+    [SerializeField] private float combatDetectionDistance = 30f;
+    [SerializeField] private float meleeCombatRange = 10f;
+    [SerializeField] private float rangedCombatRange = 20f;
+    private float combatRangeHalfLength = 5f;
 
     [SerializeField] private float bulletSpeed = 15f;
     [SerializeField] private int bulletDamage = 5;
 
     private bool playerDetected = false;
     private bool playerInSight = false;
+    private bool meleeState = false;
     private bool canPatrol = false;
     private bool canAttack = false;
     private bool isAttacking = false;
     private bool isRangedAttacking = false;
+    private bool isStrafing = false;
+    private bool canStrafe = false;
     private bool isDamaged = false;
     private bool isFrozen = false;
 
     /// <summary>
     /// AIステートの移動ENUM
     /// </summary>
-    enum StateTransition
+    enum EnemyState
     {
         IDLE,
         PATROL,
         CHASE,
-        COMBAT,
+        MELEE,
+        RANGED,
         ATTACK,
         STUN,
         DAMAGED,
-        DEAD,
+        DEAD
     }
 
     /// <summary>
@@ -102,47 +111,60 @@ public partial class EnemyGrunt : EnemyBase
     {
         stateMachine = new ImtStateMachine<EnemyGrunt>(this);
 
-        stateMachine.AddTransition<EnemyGrunt_Init, EnemyGrunt_Idle>((int)StateTransition.IDLE);
-        stateMachine.AddTransition<EnemyGrunt_Patrol, EnemyGrunt_Idle>((int)StateTransition.IDLE);
-        stateMachine.AddTransition<EnemyGrunt_Chase, EnemyGrunt_Idle>((int)StateTransition.IDLE);
-        stateMachine.AddTransition<EnemyGrunt_Combat, EnemyGrunt_Idle>((int)StateTransition.IDLE);
-        stateMachine.AddTransition<EnemyGrunt_Damaged, EnemyGrunt_Idle>((int)StateTransition.IDLE);
+        stateMachine.AddTransition<EnemyGrunt_Init, EnemyGrunt_Idle>((int)EnemyState.IDLE);
+        stateMachine.AddTransition<EnemyGrunt_Patrol, EnemyGrunt_Idle>((int)EnemyState.IDLE);
+        stateMachine.AddTransition<EnemyGrunt_Chase, EnemyGrunt_Idle>((int)EnemyState.IDLE);
+        stateMachine.AddTransition<EnemyGrunt_Melee, EnemyGrunt_Idle>((int)EnemyState.IDLE);
+        stateMachine.AddTransition<EnemyGrunt_Ranged, EnemyGrunt_Idle>((int)EnemyState.IDLE);
+        stateMachine.AddTransition<EnemyGrunt_Damaged, EnemyGrunt_Idle>((int)EnemyState.IDLE);
 
-        stateMachine.AddTransition<EnemyGrunt_Idle, EnemyGrunt_Patrol>((int)StateTransition.PATROL);
+        stateMachine.AddTransition<EnemyGrunt_Idle, EnemyGrunt_Patrol>((int)EnemyState.PATROL);
 
-        stateMachine.AddTransition<EnemyGrunt_Idle, EnemyGrunt_Chase>((int)StateTransition.CHASE);
-        stateMachine.AddTransition<EnemyGrunt_Patrol, EnemyGrunt_Chase>((int)StateTransition.CHASE);
-        stateMachine.AddTransition<EnemyGrunt_Combat, EnemyGrunt_Chase>((int)StateTransition.CHASE);
-        stateMachine.AddTransition<EnemyGrunt_Damaged, EnemyGrunt_Chase>((int)StateTransition.CHASE);
+        stateMachine.AddTransition<EnemyGrunt_Idle, EnemyGrunt_Chase>((int)EnemyState.CHASE);
+        stateMachine.AddTransition<EnemyGrunt_Patrol, EnemyGrunt_Chase>((int)EnemyState.CHASE);
+        stateMachine.AddTransition<EnemyGrunt_Melee, EnemyGrunt_Chase>((int)EnemyState.CHASE);
+        stateMachine.AddTransition<EnemyGrunt_Ranged, EnemyGrunt_Chase>((int)EnemyState.CHASE);
+        stateMachine.AddTransition<EnemyGrunt_Damaged, EnemyGrunt_Chase>((int)EnemyState.CHASE);
 
-        stateMachine.AddTransition<EnemyGrunt_Idle, EnemyGrunt_Combat>((int)StateTransition.COMBAT);
-        stateMachine.AddTransition<EnemyGrunt_Patrol, EnemyGrunt_Combat>((int)StateTransition.COMBAT);
-        stateMachine.AddTransition<EnemyGrunt_Chase, EnemyGrunt_Combat>((int)StateTransition.COMBAT);
-        stateMachine.AddTransition<EnemyGrunt_Attack, EnemyGrunt_Combat>((int)StateTransition.COMBAT);
-        stateMachine.AddTransition<EnemyGrunt_Stun, EnemyGrunt_Combat>((int)StateTransition.COMBAT);
-        stateMachine.AddTransition<EnemyGrunt_Damaged, EnemyGrunt_Combat>((int)StateTransition.COMBAT);
+        stateMachine.AddTransition<EnemyGrunt_Idle, EnemyGrunt_Melee>((int)EnemyState.MELEE);
+        stateMachine.AddTransition<EnemyGrunt_Patrol, EnemyGrunt_Melee>((int)EnemyState.MELEE);
+        stateMachine.AddTransition<EnemyGrunt_Chase, EnemyGrunt_Melee>((int)EnemyState.MELEE);
+        stateMachine.AddTransition<EnemyGrunt_Attack, EnemyGrunt_Melee>((int)EnemyState.MELEE);
+        stateMachine.AddTransition<EnemyGrunt_Stun, EnemyGrunt_Melee>((int)EnemyState.MELEE);
+        stateMachine.AddTransition<EnemyGrunt_Damaged, EnemyGrunt_Melee>((int)EnemyState.MELEE);
 
-        stateMachine.AddTransition<EnemyGrunt_Combat, EnemyGrunt_Attack>((int)StateTransition.ATTACK);
+        stateMachine.AddTransition<EnemyGrunt_Idle, EnemyGrunt_Ranged>((int)EnemyState.RANGED);
+        stateMachine.AddTransition<EnemyGrunt_Patrol, EnemyGrunt_Ranged>((int)EnemyState.RANGED);
+        stateMachine.AddTransition<EnemyGrunt_Chase, EnemyGrunt_Ranged>((int)EnemyState.RANGED);
+        stateMachine.AddTransition<EnemyGrunt_Attack, EnemyGrunt_Ranged>((int)EnemyState.RANGED);
+        stateMachine.AddTransition<EnemyGrunt_Stun, EnemyGrunt_Ranged>((int)EnemyState.RANGED);
+        stateMachine.AddTransition<EnemyGrunt_Damaged, EnemyGrunt_Ranged>((int)EnemyState.RANGED);
 
-        stateMachine.AddTransition<EnemyGrunt_Idle, EnemyGrunt_Stun>((int)StateTransition.STUN);
-        stateMachine.AddTransition<EnemyGrunt_Patrol, EnemyGrunt_Stun>((int)StateTransition.STUN);
-        stateMachine.AddTransition<EnemyGrunt_Chase, EnemyGrunt_Stun>((int)StateTransition.STUN);
-        stateMachine.AddTransition<EnemyGrunt_Combat, EnemyGrunt_Stun>((int)StateTransition.STUN);
-        stateMachine.AddTransition<EnemyGrunt_Attack, EnemyGrunt_Stun>((int)StateTransition.STUN);
-        stateMachine.AddTransition<EnemyGrunt_Damaged, EnemyGrunt_Stun>((int)StateTransition.STUN);
+        stateMachine.AddTransition<EnemyGrunt_Melee, EnemyGrunt_Attack>((int)EnemyState.ATTACK);
+        stateMachine.AddTransition<EnemyGrunt_Ranged, EnemyGrunt_Attack>((int)EnemyState.ATTACK);
 
-        stateMachine.AddTransition<EnemyGrunt_Idle, EnemyGrunt_Damaged>((int)StateTransition.DAMAGED);
-        stateMachine.AddTransition<EnemyGrunt_Patrol, EnemyGrunt_Damaged>((int)StateTransition.DAMAGED);
-        stateMachine.AddTransition<EnemyGrunt_Chase, EnemyGrunt_Damaged>((int)StateTransition.DAMAGED);
-        stateMachine.AddTransition<EnemyGrunt_Combat, EnemyGrunt_Damaged>((int)StateTransition.DAMAGED);
-        stateMachine.AddTransition<EnemyGrunt_Attack, EnemyGrunt_Damaged>((int)StateTransition.DAMAGED);
+        stateMachine.AddTransition<EnemyGrunt_Idle, EnemyGrunt_Stun>((int)EnemyState.STUN);
+        stateMachine.AddTransition<EnemyGrunt_Patrol, EnemyGrunt_Stun>((int)EnemyState.STUN);
+        stateMachine.AddTransition<EnemyGrunt_Chase, EnemyGrunt_Stun>((int)EnemyState.STUN);
+        stateMachine.AddTransition<EnemyGrunt_Melee, EnemyGrunt_Stun>((int)EnemyState.STUN);
+        stateMachine.AddTransition<EnemyGrunt_Ranged, EnemyGrunt_Stun>((int)EnemyState.STUN);
+        stateMachine.AddTransition<EnemyGrunt_Attack, EnemyGrunt_Stun>((int)EnemyState.STUN);
+        stateMachine.AddTransition<EnemyGrunt_Damaged, EnemyGrunt_Stun>((int)EnemyState.STUN);
 
-        stateMachine.AddTransition<EnemyGrunt_Idle, EnemyGrunt_Death>((int)StateTransition.DEAD);
-        stateMachine.AddTransition<EnemyGrunt_Patrol, EnemyGrunt_Death>((int)StateTransition.DEAD);
-        stateMachine.AddTransition<EnemyGrunt_Chase, EnemyGrunt_Death>((int)StateTransition.DEAD);
-        stateMachine.AddTransition<EnemyGrunt_Combat, EnemyGrunt_Death>((int)StateTransition.DEAD);
-        stateMachine.AddTransition<EnemyGrunt_Attack, EnemyGrunt_Death>((int)StateTransition.DEAD);
-        stateMachine.AddTransition<EnemyGrunt_Damaged, EnemyGrunt_Death>((int)StateTransition.DEAD);
+        stateMachine.AddTransition<EnemyGrunt_Idle, EnemyGrunt_Damaged>((int)EnemyState.DAMAGED);
+        stateMachine.AddTransition<EnemyGrunt_Patrol, EnemyGrunt_Damaged>((int)EnemyState.DAMAGED);
+        stateMachine.AddTransition<EnemyGrunt_Chase, EnemyGrunt_Damaged>((int)EnemyState.DAMAGED);
+        stateMachine.AddTransition<EnemyGrunt_Melee, EnemyGrunt_Damaged>((int)EnemyState.DAMAGED);
+        stateMachine.AddTransition<EnemyGrunt_Ranged, EnemyGrunt_Damaged>((int)EnemyState.DAMAGED);
+        stateMachine.AddTransition<EnemyGrunt_Attack, EnemyGrunt_Damaged>((int)EnemyState.DAMAGED);
+
+        stateMachine.AddTransition<EnemyGrunt_Idle, EnemyGrunt_Death>((int)EnemyState.DEAD);
+        stateMachine.AddTransition<EnemyGrunt_Patrol, EnemyGrunt_Death>((int)EnemyState.DEAD);
+        stateMachine.AddTransition<EnemyGrunt_Chase, EnemyGrunt_Death>((int)EnemyState.DEAD);
+        stateMachine.AddTransition<EnemyGrunt_Melee, EnemyGrunt_Death>((int)EnemyState.DEAD);
+        stateMachine.AddTransition<EnemyGrunt_Ranged, EnemyGrunt_Death>((int)EnemyState.DEAD);
+        stateMachine.AddTransition<EnemyGrunt_Attack, EnemyGrunt_Death>((int)EnemyState.DEAD);
+        stateMachine.AddTransition<EnemyGrunt_Damaged, EnemyGrunt_Death>((int)EnemyState.DEAD);
 
         stateMachine.SetStartState<EnemyGrunt_Init>();
     }
@@ -192,12 +214,109 @@ public partial class EnemyGrunt : EnemyBase
         isInitialized = true;
         canPatrol = true;
         canAttack = true;
+        canStrafe = true;
     }
 
+    /// <summary>
+    /// ステート変更とステート変数の更新
+    /// </summary>
+    /// <param name="state"></param>
+    private void UpdateState(EnemyState state)
+    {
+        currentState = state;
+        stateMachine.SendEvent((int)state);
+    }
+
+    /// <summary>
+    /// 戦闘状態を更新（近距離遠距離状態にするか判断する）
+    /// </summary>
+    private void EvaluateCombatState()
+    {
+        int meleeCount = GetMeleeEnemies();
+        float distanceToPlayer = Vector3.Distance(playerPos, transform.position);
+
+        // すでに戦闘状態の場合
+        if (playerDetected)
+        {
+            if (meleeCount == 0)
+            {
+                meleeState = true;
+
+                if (distanceToPlayer < meleeCombatRange)
+                {
+                    UpdateState(EnemyState.MELEE);
+                }
+                else
+                {
+                    UpdateState(EnemyState.CHASE);
+                }
+                return;
+            }
+
+            if (meleeState)
+            {
+                if (distanceToPlayer < meleeCombatRange)
+                {
+                    UpdateState(EnemyState.MELEE);
+                }
+                else
+                {
+                    UpdateState(EnemyState.CHASE);
+                }
+            }
+            else
+            {
+                if (distanceToPlayer < rangedCombatRange)
+                {
+                    UpdateState(EnemyState.MELEE);
+                }
+                else
+                {
+                    UpdateState(EnemyState.CHASE);
+                }
+            }
+        }
+        else
+        {
+            playerDetected = true;
+
+            if (meleeCount == 0 || (distanceToPlayer < meleeCombatRange && meleeCount < 3))
+            {
+                meleeState = true;
+                
+                if (distanceToPlayer < meleeCombatRange)
+                {
+                    UpdateState(EnemyState.MELEE);
+                }
+                else
+                {
+                    UpdateState(EnemyState.CHASE);
+                }
+            }
+            else
+            {
+                meleeState = false;
+
+                if (distanceToPlayer < rangedCombatRange)
+                {
+                    UpdateState(EnemyState.RANGED);
+                }
+                else
+                {
+                    UpdateState(EnemyState.CHASE);
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// プレイヤーが見えるか確認する
+    /// </summary>
     private void CheckPlayerVisible()
     {
         Vector3 dirToPlayer = player.transform.position - transform.position;
 
+        // 敵の視野内にいるかどうか
         if (!playerInSight)
         {
             // 頭を振り向く機能とかあれば頭を基準にしたい
@@ -209,7 +328,10 @@ public partial class EnemyGrunt : EnemyBase
             }
         }
 
-        bool playerVisible = !Physics.Linecast(transform.position, player.transform.position, 0) && dirToPlayer.magnitude < playerSearchDistance;
+        float playerCheckDistance = playerDetected ? combatDetectionDistance : playerSearchDistance;
+
+        // 敵が直接見えるかどうか（壁などの障害がないか、遠すぎないか、視野内は考慮しない）
+        bool playerVisible = !Physics.Linecast(transform.position, player.transform.position, 0) && dirToPlayer.magnitude < playerCheckDistance;
 
         // プレイヤーの最新のポジションを取得
         if (playerVisible)
@@ -217,15 +339,17 @@ public partial class EnemyGrunt : EnemyBase
             playerPos = player.transform.position;
         }
 
+        // 敵がプレイヤーをもう一度見つけた
         if (playerVisible && !playerInSight)
         {
             playerLoseDetectionCts?.Cancel();
             playerLoseDetectionCts?.Dispose();
             playerLoseDetectionCts = null;
 
-            playerDetected = true;
             playerInSight = true;
+            EvaluateCombatState();
         }
+        // 敵がプレイヤーを見失った
         else if (!playerVisible && playerInSight)
         {
             playerLoseDetectionCts?.Cancel();
@@ -234,6 +358,7 @@ public partial class EnemyGrunt : EnemyBase
             playerInSight = false;
             playerLoseDetectionCts = new CancellationTokenSource();
             ResetPlayerDetection(playerLoseDetectionCts.Token).Forget();
+            UpdateState(EnemyState.CHASE);
         }
     }
 
@@ -252,7 +377,7 @@ public partial class EnemyGrunt : EnemyBase
         if(data.HP > 0)
         {
             isDamaged = true;
-            stateMachine.SendEvent((int)StateTransition.DAMAGED);
+            UpdateState(EnemyState.DAMAGED);
 
             damageFlashCts?.Cancel();
             damageFlashCts?.Dispose();
@@ -264,7 +389,7 @@ public partial class EnemyGrunt : EnemyBase
         else
         {
             isDead = true;
-            stateMachine.SendEvent((int)StateTransition.DEAD);
+            UpdateState(EnemyState.DEAD);
         }
         return isDead;
     }
@@ -273,6 +398,26 @@ public partial class EnemyGrunt : EnemyBase
     {
         DeathMotion().Forget();
         Debug.Log($"Enemy [{gameObject.name}] died");
+    }
+
+    public override EnemyType GetEnemyType()
+    {
+        return enemyType;
+    }
+
+    public override bool IsMeleeAttacking()
+    {
+        return isAttacking;
+    }
+
+    public override bool IsMeleeState()
+    {
+        return meleeState;
+    }
+
+    public override bool InCombat()
+    {
+        return playerDetected;
     }
 
     private void MeleeAttack()
@@ -294,6 +439,93 @@ public partial class EnemyGrunt : EnemyBase
         projectile.Fire(transform.forward, bulletSpeed, bulletDamage);
     }
 
+    /// <summary>
+    /// 戦闘中の移動
+    /// </summary>
+    private void CombatMovement()
+    {
+        isStrafing = true;
+
+        Vector3 strafeDir;
+        Vector3 playerDir = playerPos - transform.position;
+        float distance = playerDir.magnitude;
+        float desiredDistance = (meleeState ? meleeCombatRange : rangedCombatRange) - combatRangeHalfLength;
+
+        List<IEnemy> nearEnemies =  GetEnemiesInRange(transform.position, 3);
+
+        if (nearEnemies.Count == 0)
+        {
+            strafeDir = Vector3.Cross(playerDir.normalized, Vector3.up) * (UnityEngine.Random.Range(0, 2) == 0 ? -1 : 1);
+
+            if (distance > desiredDistance + 0.5f)
+            {
+                strafeDir += playerDir.normalized;
+            }
+            else if (distance < desiredDistance - 0.5f)
+            {
+                strafeDir -= playerDir.normalized;
+            }
+        }
+        else
+        {
+            Vector3 closestEnemy = new Vector3(0, -100000, 0);
+            foreach (var enemy in nearEnemies)
+            {
+                if (Vector3.Distance(closestEnemy, transform.position) > Vector3.Distance(enemy.GetTransform().position, transform.position))
+                {
+                    closestEnemy = enemy.GetTransform().position;
+                }
+            }
+
+            strafeDir = (transform.position - closestEnemy).normalized;
+        }
+
+        navAgent.destination = transform.position + strafeDir.normalized * 2f;
+    }
+
+    /// <summary>
+    /// 近距離状態の敵の数を取得
+    /// </summary>
+    /// <returns></returns>
+    private int GetMeleeEnemies()
+    {
+        int meleeCount = 0;
+        List<IEnemy> enemyList = GetEnemiesInRange(playerPos, combatDetectionDistance);
+
+        foreach (IEnemy enemy in enemyList)
+        {
+            if (enemy.InCombat() && enemy.IsMeleeState())
+            {
+                meleeCount++;
+            }
+        }
+
+        return meleeCount;
+    }
+
+    /// <summary>
+    /// 範囲内の敵を取得
+    /// </summary>
+    /// <param name="startPos"></param>
+    /// <param name="checkRadius"></param>
+    /// <returns></returns>
+    private List<IEnemy> GetEnemiesInRange(Vector3 startPos, float checkRadius)
+    {
+        List<IEnemy> enemyList = new List<IEnemy>();
+        Collider[] enemyColliders = Physics.OverlapSphere(startPos, checkRadius);
+
+        foreach (Collider collider in enemyColliders)
+        {
+            IEnemy enemy = collider.gameObject.GetComponent<IEnemy>();
+            if (enemy != null && collider.gameObject != gameObject)
+            {
+                enemyList.Add(enemy);
+            }
+        }
+
+        return enemyList;
+    }
+
     private async UniTaskVoid DamageFlash(CancellationToken token)
     {
         try
@@ -312,11 +544,11 @@ public partial class EnemyGrunt : EnemyBase
 
             if (playerDetected)
             {
-                stateMachine.SendEvent((int)StateTransition.COMBAT);
+                EvaluateCombatState();
             }
             else
             {
-                stateMachine.SendEvent((int)StateTransition.IDLE);
+                UpdateState(EnemyState.IDLE);
             }
         }
         finally
@@ -343,6 +575,16 @@ public partial class EnemyGrunt : EnemyBase
     private async UniTaskVoid MeleeAttackAnimation()
     {
         isAttacking = true;
+        navAgent.SetDestination(playerPos);
+        while (true)
+        {
+            if (Vector3.Distance(playerPos, transform.position) < meleeAttackRange)
+            {
+                break;
+            }
+            await TimeControl.KronoYield();
+        }
+        navAgent.isStopped = true;
         attackBox.SetActive(true);
         audioSource.PlayOneShot(swordClip);
         await TimeControl.KronoDelay(meleeAttackTime);
@@ -382,6 +624,12 @@ public partial class EnemyGrunt : EnemyBase
         canAttack = true;
     }
 
+    private async UniTaskVoid ResetStrafeCooldown(float strafeCooldown)
+    {
+        await TimeControl.KronoDelay(strafeCooldown);
+        canStrafe = true;
+    }
+
     private async UniTaskVoid ResetPlayerDetection(CancellationToken token)
     {
         try
@@ -389,6 +637,7 @@ public partial class EnemyGrunt : EnemyBase
             await TimeControl.KronoDelay(playerSearchTime, token);
             playerDetected = false;
             playerInSight = false;
+            UpdateState(EnemyState.IDLE);
         }
         catch (OperationCanceledException)
         {

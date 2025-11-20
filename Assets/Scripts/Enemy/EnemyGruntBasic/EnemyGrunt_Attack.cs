@@ -10,7 +10,6 @@ public partial class EnemyGrunt
     {
         protected override void Update()
         {
-            Context.CheckPlayerVisible();
 
             if (Context.isRangedAttacking)
             {
@@ -19,14 +18,13 @@ public partial class EnemyGrunt
                 if(dir.sqrMagnitude > 0.001f)
                 {
                     Quaternion lookRotation = Quaternion.LookRotation(dir);
-                    //Context.transform.rotation = lookRotation;
                     Context.transform.rotation = Quaternion.RotateTowards(Context.transform.rotation, lookRotation, Time.deltaTime * Context.navAgent.angularSpeed);
                 }
             }
             
             if(!Context.isAttacking)
             {
-                Context.stateMachine.SendEvent((int)StateTransition.COMBAT);
+                Context.EvaluateCombatState();
             }
         }
     }
