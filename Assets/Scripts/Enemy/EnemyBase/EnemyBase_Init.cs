@@ -17,7 +17,7 @@ public partial class EnemyBase
         {
             if (Context.isInitialized)
             {
-                Context.stateMachine.SendEvent((int)StateTransition.IDLE);
+                Context.stateMachine.SendEvent((int)EnemyState.IDLE);
             }
         }
 

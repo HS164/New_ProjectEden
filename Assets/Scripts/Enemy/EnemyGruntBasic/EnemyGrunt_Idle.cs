@@ -17,15 +17,9 @@ public partial class EnemyGrunt
         {
             Context.CheckPlayerVisible();
 
-            if (Context.playerDetected)
-            {
-                Context.stateMachine.SendEvent((int)StateTransition.CHASE);
-                return;
-            }
-
             if(Context.canPatrol)
             {
-                Context.stateMachine.SendEvent((int)StateTransition.PATROL);
+                Context.UpdateState(EnemyState.PATROL);
                 return;
             }
         }
