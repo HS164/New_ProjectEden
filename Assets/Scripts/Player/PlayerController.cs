@@ -252,6 +252,7 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
                 {
                     selectableObj.OnRelease();
                     isFixed = false;
+                    rbody.isKinematic = false;
                     Debug.Log("fixed");
                 }
                 damageObj.Death();
@@ -293,6 +294,7 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
     {
         SelectableObjectManager.instance.ReleaseTarget();
         isFixed = false;
+        rbody.isKinematic = false;
     }
 
     public bool Damage(float damage)
@@ -317,6 +319,7 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         Vector3 currentPos = transform.position;
         Vector3 warpPos;
         rbody.linearVelocity = Vector3.zero;
+        rbody.isKinematic = true;
         var dir = new Vector3(targetObj.position.x, 0, targetObj.position.z) - new Vector3(transform.position.x, 0, transform.position.z);
         transform.rotation = Quaternion.LookRotation(dir);
         warpPos = targetObj.position - dir.normalized;
