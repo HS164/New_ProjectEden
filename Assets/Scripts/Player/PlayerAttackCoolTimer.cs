@@ -83,6 +83,21 @@ public class PlayerAttackCoolTimer
         }
     }
 
+    // クールタイム処理のキャンセル
+    public void CancelCoolDown()
+    {
+        if (!nonAttackable)
+        {
+            // タイマー実行中でない場合即座に処理を終了
+            return;
+        }
+
+        Debug.Log("cancel AttackCoolDown");
+        // キャンセルを受け付けた場合、キャンセルを行う。
+        _nonAttackable = false;
+        attackCoolDownCts.Cancel();
+    }
+
     public void ChangeOverDrive()
     {
         if (nonAttackable)

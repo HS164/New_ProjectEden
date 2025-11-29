@@ -41,6 +41,7 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
 
     // 攻撃後隙の時間
     [SerializeField] private float attackCoolTime;
+    [SerializeField] private GameObject attackBox;
     private PlayerAttackCoolTimer attackableTimer;
 
     [SerializeField] private float overDriveTime = 10f;
@@ -80,6 +81,7 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
 
         attackableTimer = new PlayerAttackCoolTimer(attackCoolTime, overDriveTime);
         attackableTimer.SetPlayer(this.gameObject.transform);
+        attackBox.SetActive(false);
         kronoEnd = new PlayerKronoEnd(kronoEndTime);
 
         lineRenderer.positionCount = 2;
@@ -163,7 +165,14 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
             }
             if (input.ReleaseTarget.WasPressedThisFrame())
             {
+                // スペースボタンでターゲットを離れる
                 ReleaseTarget();
+
+                // 攻撃中の場合アニメーションの中断、攻撃硬直を解除
+                if (attackableTimer.nonAttackable)
+                {
+                    attackableTimer.CancelCoolDown();
+                }
             }
             if (input.Sprint.WasReleasedThisFrame())
             {
@@ -259,8 +268,11 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
             }
         }
 
-        // 攻撃の後隙を開始する
+        // 攻撃中に、攻撃処理が行われないようにするための待機処理
         attackableTimer.StartAttackCoolDown();
+
+        // 攻撃アニメーションの終了を待機する
+        ViewAttackAnimation().Forget();
     }
 
     private void Jump()
@@ -457,6 +469,29 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         isTimeShifting = false;
         Time.timeScale = 1.0f;
         Destroy(prefab);
+    }
+
+    /// <summary>
+    /// 攻撃状態の可視化の制御
+    /// </summary>
+    /// <returns></returns>
+    private async UniTaskVoid ViewAttackAnimation()
+    {
+        // 攻撃判定の可視化（攻撃アニメーションがある場合、それを再生）
+        attackBox.SetActive(true);
+        float interval = attackCoolTime / 5;
+        float timeoutTimer = 0;
+
+        while (attackableTimer.nonAttackable)
+        {
+            // 攻撃不可能な時間は待機し続ける
+            await UniTask.Delay(TimeSpan.FromSeconds(interval), true);
+            timeoutTimer += interval;
+            // タイムアウトしたらループを抜ける
+            if (timeoutTimer > attackCoolTime + 1f) break;
+        }
+
+        attackBox.SetActive(false);
     }
 
     // オーバードライブ起動
