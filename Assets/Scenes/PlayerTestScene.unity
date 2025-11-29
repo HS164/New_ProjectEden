@@ -3313,6 +3313,11 @@ PrefabInstance:
       propertyPath: cameraObj
       value: 
       objectReference: {fileID: 1509989759}
+    - target: {fileID: 355960402988361258, guid: bec916380ddc5c64695014f2ab91d970,
+        type: 3}
+      propertyPath: attackCoolTime
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3528744360216756940, guid: bec916380ddc5c64695014f2ab91d970,
         type: 3}
       propertyPath: m_Name
