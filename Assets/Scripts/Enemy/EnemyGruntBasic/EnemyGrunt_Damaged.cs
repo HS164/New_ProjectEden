@@ -10,7 +10,22 @@ public partial class EnemyGrunt
     {
         protected override void Enter()
         {
-            Context.navAgent.isStopped = true;
+            Debug.Log("entered damaged state");
         }
+
+        protected override void Update()
+        {
+            if (!Context.isDamaged)
+            {
+                Context.navAgent.enabled = true;
+                Context.EvaluateCombatState();
+            }            
+        }
+
+        protected override void Exit()
+        {
+            Debug.Log("exited damaged state");
+        }
+
     }
 }

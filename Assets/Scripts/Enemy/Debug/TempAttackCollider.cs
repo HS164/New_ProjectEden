@@ -10,7 +10,7 @@ public class TempAttackCollider : MonoBehaviour
         if (damageable != null)
         {
             bool targetDead = false;
-            targetDead = damageable.Damage(attackDamage);
+            targetDead = damageable.Damage(attackDamage, transform.position);
             if (targetDead)
             {
                 damageable.Death();
