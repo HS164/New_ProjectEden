@@ -20,6 +20,7 @@ public partial class EnemyGrunt : EnemyBase
     private NavMeshAgent navAgent;
 
     private GameObject player;
+    private Rigidbody rbody;
     [SerializeField] private GameObject attackBox;
     [SerializeField] private GameObject bulletPrefab;
     [SerializeField] private Transform bulletShootPoint;
@@ -30,6 +31,9 @@ public partial class EnemyGrunt : EnemyBase
 
     private CancellationTokenSource playerLoseDetectionCts;
     private CancellationTokenSource damageFlashCts;
+    private CancellationTokenSource damageCts;
+    private CancellationTokenSource meleeAttackCts;
+    private CancellationTokenSource rangedAttackCts;
 
     [SerializeField] private Vector3[] patrolPoints;
 
@@ -206,6 +210,7 @@ public partial class EnemyGrunt : EnemyBase
     private void Initialize()
     {
         player = GameObject.FindWithTag("Player");
+        rbody = GetComponent<Rigidbody>();
         navAgent = GetComponent<NavMeshAgent>();
         mesh = GetComponent<MeshRenderer>();
         originalColor = mesh.material.color;
@@ -366,7 +371,7 @@ public partial class EnemyGrunt : EnemyBase
     /// IDamageのダメージ関数、攻撃受けた時用
     /// </summary>
     /// <param name="damageValue"></param>
-    public override bool Damage(float damageValue)
+    public override bool Damage(float damageValue, Vector3 hitPosition)
     {
         if(isDead)
         {
@@ -379,10 +384,27 @@ public partial class EnemyGrunt : EnemyBase
             isDamaged = true;
             UpdateState(EnemyState.DAMAGED);
 
+            meleeAttackCts?.Cancel();
+            rangedAttackCts?.Cancel();
+
+            if(navAgent.enabled)
+            {
+                navAgent.isStopped = true;
+                navAgent.updateRotation = true;
+                navAgent.enabled = false;
+            }
+            rbody.useGravity = true;
+            rbody.isKinematic = false;
+
             damageFlashCts?.Cancel();
             damageFlashCts?.Dispose();
             damageFlashCts = new CancellationTokenSource();
+            damageCts?.Cancel();
+            damageCts?.Dispose();
+            damageCts = new CancellationTokenSource();
             DamageFlash(damageFlashCts.Token).Forget();
+            ResetHitStun(damageCts.Token).Forget();
+            rbody.AddForce((transform.position + Vector3.up - hitPosition).normalized * 6f, ForceMode.Impulse);
 
             Debug.Log($"Enemy [{gameObject.name}] took {damageValue} damage. HP {data.HP}/{data.maxHP}");
         }
@@ -391,6 +413,7 @@ public partial class EnemyGrunt : EnemyBase
             isDead = true;
             UpdateState(EnemyState.DEAD);
         }
+
         return isDead;
     }
 
@@ -422,12 +445,18 @@ public partial class EnemyGrunt : EnemyBase
 
     private void MeleeAttack()
     {
-        MeleeAttackAnimation().Forget();
+        meleeAttackCts?.Cancel();
+        meleeAttackCts?.Dispose();
+        meleeAttackCts = new CancellationTokenSource();
+        MeleeAttackAnimation(meleeAttackCts.Token).Forget();
     }
 
     private void RangedAttack()
     {
-        RangedAttackAnimation().Forget();
+        rangedAttackCts?.Cancel();
+        rangedAttackCts?.Dispose();
+        rangedAttackCts = new CancellationTokenSource();
+        RangedAttackAnimation(rangedAttackCts.Token).Forget();
     }
 
     private void ShootProjectile()
@@ -526,6 +555,38 @@ public partial class EnemyGrunt : EnemyBase
         return enemyList;
     }
 
+    /// <summary>
+    /// スタンのクールタイム
+    /// </summary>
+    /// <param name="strafeCooldown"></param>
+    /// <returns></returns>
+    private async UniTaskVoid ResetHitStun(CancellationToken token)
+    {
+        try
+        {
+            await TimeControl.KronoYield();
+            while (rbody.linearVelocity.magnitude > 0.1f)
+            {
+                await TimeControl.KronoYield();
+            }
+
+            rbody.angularVelocity = Vector3.zero;
+            rbody.linearVelocity = Vector3.zero;
+            rbody.useGravity = false;
+            rbody.isKinematic = true;
+            navAgent.Warp(transform.position);
+            navAgent.enabled = true;
+            navAgent.ResetPath();
+
+            await TimeControl.KronoYield();
+            isDamaged = false;
+        }
+        finally
+        {
+            
+        }
+    }
+
     private async UniTaskVoid DamageFlash(CancellationToken token)
     {
         try
@@ -538,17 +599,6 @@ public partial class EnemyGrunt : EnemyBase
                 elapsed += Time.deltaTime;
                 mesh.material.color = Color.Lerp(Color.red, originalColor, elapsed / damageFlashTime);
                 await TimeControl.KronoYield(token);
-            }
-
-            isDamaged = false;
-
-            if (playerDetected)
-            {
-                EvaluateCombatState();
-            }
-            else
-            {
-                UpdateState(EnemyState.IDLE);
             }
         }
         finally
@@ -572,44 +622,62 @@ public partial class EnemyGrunt : EnemyBase
         Destroy(gameObject);
     }
 
-    private async UniTaskVoid MeleeAttackAnimation()
+    private async UniTaskVoid MeleeAttackAnimation(CancellationToken token)
     {
-        isAttacking = true;
-        navAgent.SetDestination(playerPos);
-        while (true)
+        try
         {
-            if (Vector3.Distance(playerPos, transform.position) < meleeAttackRange)
+            isAttacking = true;
+            navAgent.SetDestination(playerPos);
+            while (true)
             {
-                break;
+                if (Vector3.Distance(playerPos, transform.position) < meleeAttackRange)
+                {
+                    break;
+                }
+                await TimeControl.KronoYield(token);
             }
-            await TimeControl.KronoYield();
+            navAgent.isStopped = true;
+            attackBox.SetActive(true);
+            audioSource.PlayOneShot(swordClip);
+            await TimeControl.KronoDelay(meleeAttackTime, token);
+            attackBox.SetActive(false);
+            isAttacking = false;
+            ResetAttackCooldown(meleeAttackCooldown, token).Forget();
         }
-        navAgent.isStopped = true;
-        attackBox.SetActive(true);
-        audioSource.PlayOneShot(swordClip);
-        await TimeControl.KronoDelay(meleeAttackTime);
-        attackBox.SetActive(false);
-        isAttacking = false;
-        ResetAttackCooldown(meleeAttackCooldown).Forget();
+        catch (OperationCanceledException)
+        {
+            isAttacking = false;
+            attackBox.SetActive(false);
+            ResetAttackCooldown(meleeAttackCooldown, token).Forget();
+        }
     }
 
-    private async UniTaskVoid RangedAttackAnimation()
+    private async UniTaskVoid RangedAttackAnimation(CancellationToken token)
     {
-        isAttacking = true;
-        isRangedAttacking = true;
-        navAgent.updateRotation = false;
-        await TimeControl.KronoDelay(rangedAttackDelay);
-        for (int i = 0; i < rangedAttackCount; i++)
+        try
         {
-            await TimeControl.KronoDelay(rangedAttackInterval);
-            audioSource.PlayOneShot(gunClip);
-            ShootProjectile();
+            isAttacking = true;
+            isRangedAttacking = true;
+            navAgent.updateRotation = false;
+            await TimeControl.KronoDelay(rangedAttackDelay, token);
+            for (int i = 0; i < rangedAttackCount; i++)
+            {
+                await TimeControl.KronoDelay(rangedAttackInterval, token);
+                audioSource.PlayOneShot(gunClip);
+                ShootProjectile();
+            }
+            isRangedAttacking = false;
+            navAgent.updateRotation = true;
+            await TimeControl.KronoDelay(rangedAttackDelay, token);
+            isAttacking = false;
+            ResetAttackCooldown(rangedAttackCooldown, token).Forget();
         }
-        isRangedAttacking = false;
-        navAgent.updateRotation = true;
-        await TimeControl.KronoDelay(rangedAttackDelay);
-        isAttacking = false;
-        ResetAttackCooldown(rangedAttackCooldown).Forget();
+        catch (OperationCanceledException)
+        {
+            isAttacking = false;
+            isRangedAttacking = false;
+            ResetAttackCooldown(rangedAttackCooldown, token).Forget();
+        }
     }
 
     private async UniTaskVoid ResetPatrol()
@@ -618,10 +686,17 @@ public partial class EnemyGrunt : EnemyBase
         canPatrol = true;
     }
 
-    private async UniTaskVoid ResetAttackCooldown(float attackCooldown)
+    private async UniTaskVoid ResetAttackCooldown(float attackCooldown, CancellationToken token)
     {
-        await TimeControl.KronoDelay(attackCooldown);
-        canAttack = true;
+        try
+        {
+            await TimeControl.KronoDelay(attackCooldown);
+            canAttack = true;
+        }
+        catch (OperationCanceledException)
+        {
+
+        }        
     }
 
     private async UniTaskVoid ResetStrafeCooldown(float strafeCooldown)

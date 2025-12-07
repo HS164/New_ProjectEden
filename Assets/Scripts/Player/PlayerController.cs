@@ -50,12 +50,13 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
     private bool isKronoEnd = false;
 
     // パラメータ
-    [SerializeField] private float maxHP = 10f;
+    [SerializeField] private float maxHP;
     [SerializeField, ReadOnly] private float currentHP;
     [SerializeField, ReadOnly] private float atk = 5;
 
     private bool isFixed = false;
     private bool isDead = false;
+    private bool isStunned = false;
 
     private PlayerInput_Controller.PlayerInputActions input;
 
@@ -90,6 +91,8 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         lineRenderer.startColor = Color.yellow;
         lineRenderer.endColor = Color.yellow;
         lineRenderer.enabled = false;
+
+        Cursor.lockState = CursorLockMode.Locked;
     }
 
     private void OnEnable()
@@ -114,6 +117,11 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         {
             playerJump.Reset();
             playerAirAccele.Reset();
+        }
+
+        if (isStunned)
+        {
+            return;
         }
 
         // プレイヤーが固定されているとき(密着時)
@@ -174,12 +182,22 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
                     attackableTimer.CancelCoolDown();
                 }
             }
+            if (input.Move.ReadValue<Vector2>().magnitude > 0.1f)
+            {
+                ReleaseTarget();
+                Move();
+            }
             if (input.Sprint.WasReleasedThisFrame())
             {
                 Debug.Log("ダッシュ中断");
 
                 isDashing = false;
             }
+        }
+
+        if (input.Move.ReadValue<Vector2>().magnitude < 0.1f)
+        {
+            moveSensitivity.Reset();
         }
 
         SearchTarget();
@@ -249,7 +267,7 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         {
             Debug.Log(hit.gameObject.name);
             var damageObj = hit.GetComponent<IDamageable>();
-            var death = damageObj.Damage(atk);
+            var death = damageObj.Damage(atk, transform.position);
             // 神速パワーアップ
             PlayerPowerManager.Instance.ChargeGauge();
             // スピードリンク発動
@@ -309,13 +327,23 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         rbody.isKinematic = false;
     }
 
-    public bool Damage(float damage)
+    public bool Damage(float damage, Vector3 hitPosition)
     {
         currentHP -= damage;
+
         if (currentHP <= 0)
         {
             return true;
         }
+
+        ReleaseTarget();
+
+        isStunned = true;
+
+        rbody.AddForce((transform.position + Vector3.up - hitPosition).normalized * 5f, ForceMode.Impulse);
+
+        ResetHitStun(0.2f).Forget();
+
         return false;
     }
 
@@ -331,6 +359,7 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         Vector3 currentPos = transform.position;
         Vector3 warpPos;
         rbody.linearVelocity = Vector3.zero;
+        moveSensitivity.Reset();
         rbody.isKinematic = true;
         var dir = new Vector3(targetObj.position.x, 0, targetObj.position.z) - new Vector3(transform.position.x, 0, transform.position.z);
         transform.rotation = Quaternion.LookRotation(dir);
@@ -504,6 +533,17 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         attackableTimer.ChangeOverDrive();
     }
 
+    /// <summary>
+    /// スタンのクールタイム
+    /// </summary>
+    /// <param name="strafeCooldown"></param>
+    /// <returns></returns>
+    private async UniTaskVoid ResetHitStun(float hitStunTime)
+    {
+        await UniTask.WaitForSeconds(hitStunTime);
+        isStunned = false;
+    }
+
     // クロノ・エンド起動
     private async void ActiveKronoEnd()
     {
@@ -524,7 +564,7 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
             Debug.Log("finish Krono End");
             // 終了時、HPの半分のダメージをくらう
             float damage = currentHP / 2;
-            Damage(damage);
+            Damage(damage, transform.position);
         }
 
         isKronoEnd = false;

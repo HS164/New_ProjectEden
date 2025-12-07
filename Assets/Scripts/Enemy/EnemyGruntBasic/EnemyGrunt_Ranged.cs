@@ -46,7 +46,7 @@ public partial class EnemyGrunt
                 return;
             }            
 
-            if (Context.canAttack)
+            if (Context.canAttack && !Context.isDamaged)
             {
                 Context.RangedAttack();
                 Context.canAttack = false;

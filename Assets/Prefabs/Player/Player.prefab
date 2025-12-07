@@ -252,7 +252,7 @@ GameObject:
   - component: {fileID: 6344417556431893912}
   - component: {fileID: 858976515617801369}
   - component: {fileID: 355960402988361258}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Player
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -394,9 +394,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rbody: {fileID: 858976515617801369}
   moveSensitivity:
-    max: 30
+    max: 25
     min: 10
+    startSensitivity: 5
     increaseValue: 1
+    acceleration: 0.15
+    currentSpeed: 0
     sensitivity: 0
   playerJump:
     jumpPower: 7.5
@@ -425,7 +428,7 @@ MonoBehaviour:
   attackBox: {fileID: 3280359950559448302}
   overDriveTime: 10
   kronoEndTime: 7
-  maxHP: 10
+  maxHP: 100
   currentHP: 0
   atk: 5
 --- !u!1 &7534667793179929719
