@@ -36,8 +36,11 @@ public partial class EnemyGrunt
 
         protected override void Exit()
         {
-            Context.navAgent.ResetPath();
-            Context.navAgent.isStopped = true;
+            if (Context.navAgent.enabled)
+            {
+                Context.navAgent.ResetPath();
+                Context.navAgent.isStopped = true;
+            }
             Context.canPatrol = false;
             Context.ResetPatrol().Forget();
         }
