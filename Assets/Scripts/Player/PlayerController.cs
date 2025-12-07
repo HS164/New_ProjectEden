@@ -55,10 +55,14 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
     [SerializeField, ReadOnly] private float atk = 5;
 
     private bool isFixed = false;
+    private bool isInput = false;
     private bool isDead = false;
     private bool isStunned = false;
 
     private PlayerInput_Controller.PlayerInputActions input;
+
+    // ターゲットとなるオブジェクトを取得
+    SelectableObjectManager selectableManager;
 
     public float CurrentHp
     {
@@ -92,6 +96,7 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         lineRenderer.endColor = Color.yellow;
         lineRenderer.enabled = false;
 
+        selectableManager = SelectableObjectManager.instance;
         Cursor.lockState = CursorLockMode.Locked;
     }
 
@@ -127,42 +132,45 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         // プレイヤーが固定されているとき(密着時)
         if (!isFixed)
         {
-            if (playerJump.IsJump())
+            if(!isInput)
             {
-                if (playerAirAccele.CanAction() && input.AirAccele.WasPressedThisFrame())
+                if (playerJump.IsJump())
                 {
-                    playerAirAccele.CountUpAction();
-                    AirAccele();
+                    if (playerAirAccele.CanAction() && input.AirAccele.WasPressedThisFrame())
+                    {
+                        playerAirAccele.CountUpAction();
+                        AirAccele();
+                    }
                 }
-            }
-            if (input.Move.ReadValue<Vector2>().magnitude > 0.1f)
-            {
-                Move();
-            }
-
-            if (input.Jump.WasPressedThisFrame())
-            {
-                if (playerJump.CanJump())
+                if (input.Move.ReadValue<Vector2>().magnitude > 0.1f)
                 {
-                    playerJump.CountUpJump();
-                    Jump();
+                    Move();
                 }
-            }
-            if (input.Sprint.WasPressedThisFrame())
-            {
-                Debug.Log("ダッシュ開始");
 
-                isDashing = true;
-            }
-            if(input.Sprint.WasReleasedThisFrame())
-            {
-                Debug.Log("ダッシュ中断");
+                if (input.Jump.WasPressedThisFrame())
+                {
+                    if (playerJump.CanJump())
+                    {
+                        playerJump.CountUpJump();
+                        Jump();
+                    }
+                }
+                if (input.Sprint.WasPressedThisFrame())
+                {
+                    Debug.Log("ダッシュ開始");
 
-                isDashing = false;
-            }
-            if(input.TimeShift.WasPressedThisFrame() && !isTimeShifting)
-            {
-                TimeShift().Forget();
+                    isDashing = true;
+                }
+                if (input.Sprint.WasReleasedThisFrame())
+                {
+                    Debug.Log("ダッシュ中断");
+
+                    isDashing = false;
+                }
+                if (input.TimeShift.WasPressedThisFrame() && !isTimeShifting)
+                {
+                    TimeShift().Forget();
+                }
             }
         }
         else
@@ -200,7 +208,11 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
             moveSensitivity.Reset();
         }
 
-        SearchTarget();
+        var isInteract = isFixed ? input.Interact.WasPressedThisFrame() : input.Attack.WasPressedThisFrame();
+        if (isInteract)
+        {
+            ReleaseKeyTelepotationTarget(isFixed).Forget();
+        }
 
         // テストコード
         // プロトタイプでスキルの起動を行うためのコード
@@ -217,6 +229,20 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
             ActiveKronoEnd();
         }
         // ---------------------------ここまで---------------------------
+    }
+
+    async UniTask ReleaseKeyTelepotationTarget(bool isFixed)
+    {
+        isInput = true;
+        // キーが離れるまでの間ターゲットを探し続ける
+        while (isFixed ? input.Interact.IsPressed() : input.Attack.IsPressed())
+        {
+            SearchTarget();
+            await UniTask.WaitForEndOfFrame();
+        }
+        isInput = false;
+        lineRenderer.enabled = false;
+        TelepotationTarget();
     }
 
     // プレイヤー移動
@@ -379,11 +405,7 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
     // ターゲットを取得
     private void SearchTarget()
     {
-        // ターゲットとなるオブジェクトを取得
-        var selectableManager = SelectableObjectManager.instance;
         var target = selectableManager.GetTargetObject();
-        bool isInteract = false;
-
         if (target != null)
         {
             lineRenderer.enabled = true;
@@ -394,41 +416,35 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         {
             lineRenderer.enabled = false;
         }
+    }
 
+    private void TelepotationTarget()
+    {
         if (attackableTimer.nonAttackable)
         {
             return;
         }
 
-        if (isFixed)
+        var target = selectableManager.GetTargetObject();
+
+        if (target != null)
         {
-            isInteract = input.Interact.WasPressedThisFrame();
-        }
-        else
-        {
-            isInteract = input.Attack.WasPressedThisFrame();
-        }
-        if (isInteract)
-        {
-            if (target != null)
+            selectableManager.SelectTarget(target);
+            Teleportation(target);
+            var weapon = target.GetComponent<IWeaponAccessor>();
+            if (weapon != null)
             {
-                selectableManager.SelectTarget(target);
-                Teleportation(target);
-                var weapon = target.GetComponent<IWeaponAccessor>();
-                if (weapon != null)
+                weaponManager.ChangeWeapon(weapon);
+                var weaponData = target.GetComponent<SelectableWeaponBase>().GetWeaponData();
+                if (weaponData != null)
                 {
-                    weaponManager.ChangeWeapon(weapon);
-                    var weaponData = target.GetComponent<SelectableWeaponBase>().GetWeaponData();
-                    if (weaponData != null)
-                    {
-                        atk = weaponData.damage;
-                        attackRange = weaponData.attackRange;
-                    }
+                    atk = weaponData.damage;
+                    attackRange = weaponData.attackRange;
                 }
-                else
-                {
-                    Attack();
-                }
+            }
+            else
+            {
+                Attack();
             }
         }
     }
