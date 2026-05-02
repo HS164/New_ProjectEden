@@ -198,15 +198,6 @@ public partial class @PlayerInput_Controller: IInputActionCollection2, IDisposab
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
-                },
-                {
-                    ""name"": ""Sprint"",
-                    ""type"": ""Button"",
-                    ""id"": ""988aafcb-4dc9-4f49-9b3a-183fe452227f"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -627,17 +618,6 @@ public partial class @PlayerInput_Controller: IInputActionCollection2, IDisposab
                     ""action"": ""ChronoEnd"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""b858d402-0d55-481d-9e9b-2a962a2d92d1"",
-                    ""path"": ""<Keyboard>/leftShift"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Sprint"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -658,7 +638,6 @@ public partial class @PlayerInput_Controller: IInputActionCollection2, IDisposab
         m_PlayerInput_TimeShift = m_PlayerInput.FindAction("TimeShift", throwIfNotFound: true);
         m_PlayerInput_OverDrive = m_PlayerInput.FindAction("OverDrive", throwIfNotFound: true);
         m_PlayerInput_ChronoEnd = m_PlayerInput.FindAction("ChronoEnd", throwIfNotFound: true);
-        m_PlayerInput_Sprint = m_PlayerInput.FindAction("Sprint", throwIfNotFound: true);
     }
 
     ~@PlayerInput_Controller()
@@ -751,7 +730,6 @@ public partial class @PlayerInput_Controller: IInputActionCollection2, IDisposab
     private readonly InputAction m_PlayerInput_TimeShift;
     private readonly InputAction m_PlayerInput_OverDrive;
     private readonly InputAction m_PlayerInput_ChronoEnd;
-    private readonly InputAction m_PlayerInput_Sprint;
     /// <summary>
     /// Provides access to input actions defined in input action map "PlayerInput".
     /// </summary>
@@ -811,10 +789,6 @@ public partial class @PlayerInput_Controller: IInputActionCollection2, IDisposab
         /// Provides access to the underlying input action "PlayerInput/ChronoEnd".
         /// </summary>
         public InputAction @ChronoEnd => m_Wrapper.m_PlayerInput_ChronoEnd;
-        /// <summary>
-        /// Provides access to the underlying input action "PlayerInput/Sprint".
-        /// </summary>
-        public InputAction @Sprint => m_Wrapper.m_PlayerInput_Sprint;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -877,9 +851,6 @@ public partial class @PlayerInput_Controller: IInputActionCollection2, IDisposab
             @ChronoEnd.started += instance.OnChronoEnd;
             @ChronoEnd.performed += instance.OnChronoEnd;
             @ChronoEnd.canceled += instance.OnChronoEnd;
-            @Sprint.started += instance.OnSprint;
-            @Sprint.performed += instance.OnSprint;
-            @Sprint.canceled += instance.OnSprint;
         }
 
         /// <summary>
@@ -927,9 +898,6 @@ public partial class @PlayerInput_Controller: IInputActionCollection2, IDisposab
             @ChronoEnd.started -= instance.OnChronoEnd;
             @ChronoEnd.performed -= instance.OnChronoEnd;
             @ChronoEnd.canceled -= instance.OnChronoEnd;
-            @Sprint.started -= instance.OnSprint;
-            @Sprint.performed -= instance.OnSprint;
-            @Sprint.canceled -= instance.OnSprint;
         }
 
         /// <summary>
@@ -1054,12 +1022,5 @@ public partial class @PlayerInput_Controller: IInputActionCollection2, IDisposab
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnChronoEnd(InputAction.CallbackContext context);
-        /// <summary>
-        /// Method invoked when associated input action "Sprint" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
-        /// </summary>
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnSprint(InputAction.CallbackContext context);
     }
 }
