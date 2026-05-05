@@ -19,7 +19,6 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
     [SerializeField] private Transform cameraObj;
     [SerializeField] private float searchRadius = 10f;
     [SerializeField, ReadOnly] private float attackRange = 1f;
-    [SerializeField] private float dashSpeed = 1.5f;
 
     // 武器を拾うシステム
     [SerializeField] private WeaponManager weaponManager;
@@ -30,7 +29,6 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
     // 幻影残身 の値
     [SerializeField] private GameObject playerShadowPrefab;
     [SerializeField] private float shadowSpawnInterval = 1;
-    private bool isDashing = false;
 
     // タイムシフトステップ　の値
     [SerializeField] private GameObject timeShiftEffect;
@@ -155,18 +153,6 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
                         Jump();
                     }
                 }
-                if (input.Sprint.WasPressedThisFrame())
-                {
-                    Debug.Log("ダッシュ開始");
-
-                    isDashing = true;
-                }
-                if (input.Sprint.WasReleasedThisFrame())
-                {
-                    Debug.Log("ダッシュ中断");
-
-                    isDashing = false;
-                }
                 if (input.TimeShift.WasPressedThisFrame() && !isTimeShifting)
                 {
                     TimeShift().Forget();
@@ -194,12 +180,6 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
             {
                 ReleaseTarget();
                 Move();
-            }
-            if (input.Sprint.WasReleasedThisFrame())
-            {
-                Debug.Log("ダッシュ中断");
-
-                isDashing = false;
             }
         }
 
@@ -253,10 +233,6 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         var dir = Quaternion.Euler(0, cameraObj.transform.eulerAngles.y, 0);
         var moveDirection = dir * inputDir;
         /****              ここまで                ****/
-        if (isDashing)
-        {
-            moveDirection *= dashSpeed;
-        }
         if(isTimeShifting)
         {
             moveDirection *= playerTimeScale / Time.timeScale;
