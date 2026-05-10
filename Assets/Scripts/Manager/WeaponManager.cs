@@ -1,22 +1,38 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 // プレイヤーの腕にアタッチするオブジェクト
 public class WeaponManager : MonoBehaviour
 {
-    private IWeaponAccessor currentWeapon = null;
+    [SerializeField] private Transform rightHandPoint;
+    [SerializeField] private Transform leftHandPoint;
+
+    // 両手持ちのものが追加されたら両手持ち用を作る。
+    private IWeaponAccessor rightHandWeapon;
+    private IWeaponAccessor leftHandWeapon;
 
     public void ChangeWeapon(IWeaponAccessor newWeapon)
     {
-        if(newWeapon == null)
+        if (newWeapon == null)
         {
             return;
         }
 
-        if(currentWeapon != null)
+        if (newWeapon is SelectableWeaponBase weapon)
         {
-            currentWeapon.UnEquipWeapon();
+            Debug.Log("WeaponName : " + weapon.GetWeaponData().weaponName);
         }
-        currentWeapon = newWeapon;
-        currentWeapon.EquipWeapon(transform);
+
+        if (newWeapon.Slot == WeaponSlot.RightHand)
+        {
+            rightHandWeapon?.UnEquipWeapon();
+            rightHandWeapon = newWeapon;
+            rightHandWeapon.EquipWeapon(rightHandPoint);
+        }
+        else
+        {
+            leftHandWeapon?.UnEquipWeapon();
+            leftHandWeapon = newWeapon;
+            leftHandWeapon.EquipWeapon(leftHandPoint);
+        }
     }
 }

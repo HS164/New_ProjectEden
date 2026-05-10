@@ -9,8 +9,18 @@ public class SelectableWeaponBase : SelectableGimmickObjectBase , IWeaponAccesso
     [SerializeField]
     private WeaponData weaponData;
 
-    // クールタイム解消用のコレクショントークン
+    [SerializeField]
+    private WeaponSlot weaponSlot = WeaponSlot.RightHand;
+
+    public WeaponSlot Slot => weaponSlot;
+
+    // UnEquipWeapon の Destroy タイマー用
     private CancellationTokenSource cts;
+
+    [SerializeField]
+    private Vector3 holdPositionOffset = Vector3.zero;
+    [SerializeField]
+    private Vector3 holdRotationOffset = Vector3.zero;
 
     [SerializeField]
     private float delayReleaseTime = 1;
@@ -34,6 +44,7 @@ public class SelectableWeaponBase : SelectableGimmickObjectBase , IWeaponAccesso
 
         // 武器を親オブジェクトに装備させる
         transform.SetParent(parent);
+        transform.SetLocalPositionAndRotation(holdPositionOffset, Quaternion.Euler(holdRotationOffset));
         cts?.Cancel();
     }
 
@@ -54,6 +65,28 @@ public class SelectableWeaponBase : SelectableGimmickObjectBase , IWeaponAccesso
             return;
         }
     }
+
+    // PlayerController からの呼び出し口。コンボ進行を内部で管理して OnAttackCombo に委譲する
+    public void OnAttack()
+    {
+        // コンボ数を取得してきて、2段階目,3段階目で挙動を変えられるように
+        // int comboStep = コンボ取得メソッド
+        // OnAttackCombo(comboStep);
+    }
+
+    // 各武器クラスでオーバーライドして comboStep ごとの攻撃を実装する
+    protected virtual void OnAttackCombo(int comboStep) { }
+
+    // 各武器クラスでオーバーライドして右クリック長押し開始時の動作を実装する(エイム時とか)
+    public virtual void OnHoldStart() { }
+
+    // 各武器クラスでオーバーライドして右クリック長押し解除時の動作を実装する(カウンターとか槍投げとか)
+    public virtual void OnHoldEnd() { }
+
+    // コンボによる段階ゲージによって変わる攻撃
+    public virtual void OnAttackComboState() { }
+    // 奥義
+    public virtual void OnSpecialMove() { }
 
     private async UniTaskVoid Destroy()
     {
