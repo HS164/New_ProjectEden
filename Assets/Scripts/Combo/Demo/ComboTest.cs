@@ -10,7 +10,10 @@ public class ComboTest : MonoBehaviour
 	{
 		comboManager.OnComboChanged += (num) => comboCount = num;
 		comboManager.OnGaugeChanged += (num) => Debug.Log($"段階ゲージ | {num}%");
-		comboManager.OnSpecialChanged += (flag) =>   Debug.Log("奥義使用可能!!");
+		comboManager.OnGaleChanged += () =>   Debug.Log("疾風使用可能!!");
+		comboManager.OnBlitzChanged += () =>   Debug.Log("迅雷使用可能!!");
+		comboManager.OnHyperdriveChanged += () =>   Debug.Log("神速使用可能!!");
+		comboManager.OnSpecialChanged += () =>   Debug.Log("奥義使用可能!!");
 	}
 
 	// Editorから呼び出すためのメソッド
