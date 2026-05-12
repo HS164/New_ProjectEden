@@ -12,6 +12,7 @@ public class SelectableWeaponBase : SelectableGimmickObjectBase , IWeaponAccesso
     [SerializeField]
     private WeaponSlot weaponSlot = WeaponSlot.RightHand;
 
+    // Slot { get {return weaponSlot; } } で実装するプロパティと同じ
     public WeaponSlot Slot => weaponSlot;
 
     // UnEquipWeapon の Destroy タイマー用

@@ -4,4 +4,5 @@ public enum WeaponSlot
 {
     RightHand,
     LeftHand,
+    BothHands,
 }
