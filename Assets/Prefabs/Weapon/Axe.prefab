@@ -12,9 +12,9 @@ GameObject:
   - component: {fileID: 7267306961703893267}
   - component: {fileID: 1349898157921802986}
   - component: {fileID: 5206257079713559232}
-  - component: {fileID: 2967504106894318534}
+  - component: {fileID: -7826637461368483234}
   m_Layer: 0
-  m_Name: Hammer
+  m_Name: Axe
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -109,7 +109,7 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &2967504106894318534
+--- !u!114 &-7826637461368483234
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -118,9 +118,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 1890321637067407812}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ee34f99838eaac9428f858724703a6cc, type: 3}
+  m_Script: {fileID: 11500000, guid: 4090b2259c5c48345ad7fa664693927f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   weaponData: {fileID: 11400000, guid: 00422c385a6fe71449deb8ca07423e58, type: 2}
+  weaponSlot: 0
+  holdPositionOffset: {x: 0, y: 0, z: 0}
+  holdRotationOffset: {x: 0, y: 0, z: 0}
   delayReleaseTime: 2
   destroyTime: 10

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 4377164811251012699}
   - component: {fileID: 7960473672622933443}
   - component: {fileID: 3926950957126912398}
-  - component: {fileID: 6158218787154743339}
+  - component: {fileID: 6946599121059492382}
   m_Layer: 0
   m_Name: Spear
   m_TagString: Untagged
@@ -109,7 +109,7 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &6158218787154743339
+--- !u!114 &6946599121059492382
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -118,9 +118,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 2422014581157164268}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ee34f99838eaac9428f858724703a6cc, type: 3}
+  m_Script: {fileID: 11500000, guid: 21523c907d7c1c345bff2163be667b3f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   weaponData: {fileID: 11400000, guid: 81004e998de8e554d9ad29481f659e08, type: 2}
+  weaponSlot: 0
+  holdPositionOffset: {x: 0, y: 0, z: 0}
+  holdRotationOffset: {x: 0, y: 0, z: 0}
   delayReleaseTime: 2
   destroyTime: 10

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 8619124952005208027}
   - component: {fileID: 7760127875047669416}
   - component: {fileID: 7354913861550932758}
-  - component: {fileID: 6856730307827069}
+  - component: {fileID: -2287142679244748784}
   m_Layer: 0
   m_Name: Gun
   m_TagString: Untagged
@@ -109,7 +109,7 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &6856730307827069
+--- !u!114 &-2287142679244748784
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -118,9 +118,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 5966391839853157438}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ee34f99838eaac9428f858724703a6cc, type: 3}
+  m_Script: {fileID: 11500000, guid: 259981696ad073643bb0fbbfae23882b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   weaponData: {fileID: 11400000, guid: 238cd86f07451bf47a236d4604ddf138, type: 2}
+  weaponSlot: 0
+  holdPositionOffset: {x: 0, y: 0, z: 0}
+  holdRotationOffset: {x: 0, y: 0, z: 0}
   delayReleaseTime: 2
   destroyTime: 10
