@@ -22,6 +22,7 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
 
     // 武器を拾うシステム
     [SerializeField] private WeaponManager weaponManager;
+    private SelectableWeaponBase currentWeapon = null;
 
     // ワープターゲットを可視化する線
     [SerializeField] private LineRenderer lineRenderer;
@@ -44,6 +45,7 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
 
     [SerializeField] private float overDriveTime = 10f;
     [SerializeField] private float kronoEndTime = 7f;
+    [SerializeField] private float warpFloatTime = 1f;
     private PlayerKronoEnd kronoEnd;
     private bool isKronoEnd = false;
 
@@ -52,10 +54,10 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
     [SerializeField, ReadOnly] private float currentHP;
     [SerializeField, ReadOnly] private float atk = 5;
 
-    private bool isFixed = false;
-    private bool isInput = false;
     private bool isDead = false;
     private bool isStunned = false;
+    private bool isTargetingEnemy = false;
+    private bool isTargetingWeapon = false;
 
     private PlayerInput_Controller.PlayerInputActions input;
 
@@ -81,6 +83,7 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         moveSensitivity.Init();
         playerJump.Reset();
         playerAirAccele.Reset();
+        isTargetingWeapon = true;
 
         attackableTimer = new PlayerAttackCoolTimer(attackCoolTime, overDriveTime);
         attackableTimer.SetPlayer(this.gameObject.transform);
@@ -95,6 +98,7 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         lineRenderer.enabled = false;
 
         selectableManager = SelectableObjectManager.instance;
+        selectableManager.SetTargetType(SelectableType.GIMMICK);
         Cursor.lockState = CursorLockMode.Locked;
     }
 
@@ -127,60 +131,83 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
             return;
         }
 
-        // プレイヤーが固定されているとき(密着時)
-        if (!isFixed)
-        {
-            if(!isInput)
-            {
-                if (playerJump.IsJump())
-                {
-                    if (playerAirAccele.CanAction() && input.AirAccele.WasPressedThisFrame())
-                    {
-                        playerAirAccele.CountUpAction();
-                        AirAccele();
-                    }
-                }
-                if (input.Move.ReadValue<Vector2>().magnitude > 0.1f)
-                {
-                    Move();
-                }
+        // new inputs
 
-                if (input.Jump.WasPressedThisFrame())
-                {
-                    if (playerJump.CanJump())
-                    {
-                        playerJump.CountUpJump();
-                        Jump();
-                    }
-                }
-                if (input.TimeShift.WasPressedThisFrame() && !isTimeShifting)
-                {
-                    TimeShift().Forget();
-                }
+        if (currentWeapon != null)
+        {
+            if (input.WeaponWarp.IsPressed() && !isTargetingEnemy && !isTargetingWeapon)
+            {
+                isTargetingWeapon = true;
+                selectableManager.SetTargetType(SelectableType.GIMMICK);
+            }
+            else if (input.EnemyWarp.IsPressed() && !isTargetingEnemy && !isTargetingWeapon && currentWeapon is not GunWeapon)
+            {
+                isTargetingEnemy = true;
+                selectableManager.SetTargetType(SelectableType.ENEMY);
+            }
+
+            if (input.WeaponWarp.WasReleasedThisFrame() && isTargetingWeapon)
+            {
+                isTargetingWeapon = false;
+                selectableManager.SetTargetType(SelectableType.NONE);
+            }
+            else if(input.EnemyWarp.WasReleasedThisFrame() && isTargetingEnemy)
+            {
+                isTargetingEnemy = false;
+                selectableManager.SetTargetType(SelectableType.NONE);
             }
         }
-        else
-        {
-            if(input.Attack.WasPressedThisFrame())
-            {
-                Attack();
-            }
-            if (input.ReleaseTarget.WasPressedThisFrame())
-            {
-                // スペースボタンでターゲットを離れる
-                ReleaseTarget();
 
-                // 攻撃中の場合アニメーションの中断、攻撃硬直を解除
-                if (attackableTimer.nonAttackable)
-                {
-                    attackableTimer.CancelCoolDown();
-                }
-            }
-            if (input.Move.ReadValue<Vector2>().magnitude > 0.1f)
+        if (input.Attack.WasPressedThisFrame())
+        {
+            if (currentWeapon == null)
             {
-                ReleaseTarget();
-                Move();
+                // weapon warp check
+                TelepotationTarget();
+                return;
             }
+
+            if (isTargetingWeapon)
+            {
+                // warp check
+                TelepotationTarget();
+                return;
+            }
+            else if (isTargetingEnemy)
+            {
+                // enemy warp check
+                TelepotationTarget();
+                return;
+            }
+
+            Attack();
+        }
+
+
+        if (playerJump.IsJump())
+        {
+            if (playerAirAccele.CanAction() && input.AirAccele.WasPressedThisFrame())
+            {
+                playerAirAccele.CountUpAction();
+                AirAccele();
+            }
+        }
+        if (input.Move.ReadValue<Vector2>().magnitude > 0.1f)
+        {
+            Move();
+        }
+        if (input.Jump.WasPressedThisFrame())
+        {
+            if (playerJump.CanJump())
+            {
+                playerJump.CountUpJump();
+                Jump();
+            }
+        }
+
+        if (input.TimeShift.WasPressedThisFrame() && !isTimeShifting)
+        {
+            TimeShift().Forget();
         }
 
         if (input.Move.ReadValue<Vector2>().magnitude < 0.1f)
@@ -188,11 +215,7 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
             moveSensitivity.Reset();
         }
 
-        var isInteract = isFixed ? input.Interact.WasPressedThisFrame() : input.Attack.WasPressedThisFrame();
-        if (isInteract)
-        {
-            ReleaseKeyTelepotationTarget(isFixed).Forget();
-        }
+        SearchTarget();
 
         // テストコード
         // プロトタイプでスキルの起動を行うためのコード
@@ -211,18 +234,20 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         // ---------------------------ここまで---------------------------
     }
 
-    async UniTask ReleaseKeyTelepotationTarget(bool isFixed)
+    async UniTask WarpFloat()
     {
-        isInput = true;
-        // キーが離れるまでの間ターゲットを探し続ける
-        while (isFixed ? input.Interact.IsPressed() : input.Attack.IsPressed())
+        float endTime = Time.time + warpFloatTime;
+
+        // Use while to wait until time passes
+        while (Time.time < endTime)
         {
-            SearchTarget();
-            await UniTask.WaitForEndOfFrame();
+            if (input.Move.IsPressed())
+            {
+                break;
+            }
+            await UniTask.Yield();
         }
-        isInput = false;
-        lineRenderer.enabled = false;
-        TelepotationTarget();
+        rbody.isKinematic = false;
     }
 
     // プレイヤー移動
@@ -244,7 +269,6 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         var moveVelocity = moveDirection * moveSensitivity.Sensitivity;
         rbody.linearVelocity = new Vector3(moveVelocity.x, rbody.linearVelocity.y, moveVelocity.z);
         transform.rotation = Quaternion.LookRotation(moveDirection);
-        //Debug.Log(rbody.linearVelocity);
     }
 
     private void Attack()
@@ -280,9 +304,6 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
                 if (selectableObj != null)
                 {
                     selectableObj.OnRelease();
-                    isFixed = false;
-                    rbody.isKinematic = false;
-                    Debug.Log("fixed");
                 }
                 damageObj.Death();
             }
@@ -322,13 +343,6 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         return hits.Count > 0;
     }
 
-    private void ReleaseTarget()
-    {
-        SelectableObjectManager.instance.ReleaseTarget();
-        isFixed = false;
-        rbody.isKinematic = false;
-    }
-
     public bool Damage(float damage, Vector3 hitPosition)
     {
         currentHP -= damage;
@@ -337,8 +351,6 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         {
             return true;
         }
-
-        ReleaseTarget();
 
         isStunned = true;
 
@@ -362,13 +374,11 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         Vector3 warpPos;
         rbody.linearVelocity = Vector3.zero;
         moveSensitivity.Reset();
-        rbody.isKinematic = true;
         var dir = new Vector3(targetObj.position.x, 0, targetObj.position.z) - new Vector3(transform.position.x, 0, transform.position.z);
         transform.rotation = Quaternion.LookRotation(dir);
         warpPos = targetObj.position - dir.normalized;
         transform.position = warpPos;
         WarpShadow(currentPos, warpPos);
-        isFixed = true;
     }
 
     private void AirAccele()
@@ -411,16 +421,23 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
             if (weapon != null)
             {
                 weaponManager.ChangeWeapon(weapon);
-                var weaponData = target.GetComponent<SelectableWeaponBase>().GetWeaponData();
+                currentWeapon = target.GetComponent<SelectableWeaponBase>();
+                var weaponData = currentWeapon.GetWeaponData();
                 if (weaponData != null)
                 {
                     atk = weaponData.damage;
                     attackRange = weaponData.attackRange;
                 }
+                isTargetingWeapon = false;
+                selectableManager.SetTargetType(SelectableType.NONE);
             }
             else
             {
                 Attack();
+                rbody.isKinematic = true;
+                WarpFloat().Forget();
+                isTargetingEnemy = false;
+                selectableManager.SetTargetType(SelectableType.NONE);
             }
         }
     }
