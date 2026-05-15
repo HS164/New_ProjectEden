@@ -3,7 +3,7 @@ using UnityEngine;
 public class SpearWeapon : SelectableWeaponBase
 {
     // エイム中かどうかを表す状態。アニメーションや UI への通知に使う
-    private bool _isAiming = false;
+    private bool isAiming = false;
 
     protected override void OnAttackCombo(int comboStep)
     {
@@ -20,14 +20,14 @@ public class SpearWeapon : SelectableWeaponBase
     // 右クリック長押し開始時
     public override void OnHoldStart()
     {
-        _isAiming = true;
+        isAiming = true;
         // エイム開始
     }
 
     // 右クリック長押し解除時
     public override void OnHoldEnd()
     {
-        _isAiming = false;
+        isAiming = false;
         // エイム解除 → 槍投げ
     }
 

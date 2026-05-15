@@ -112,6 +112,24 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "EnemyWarp",
+                    "type": "Button",
+                    "id": "1762aa09-c709-4eb0-933d-557f26f9081c",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "WeaponWarp",
+                    "type": "Button",
+                    "id": "884e5dd3-4ff5-4305-ba44-582e6a0ad4a5",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -530,6 +548,28 @@
                     "processors": "",
                     "groups": "",
                     "action": "ChronoEnd",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "110e875b-c277-4566-9364-6eb13061bdbb",
+                    "path": "<Keyboard>/leftShift",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "EnemyWarp",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8ad20663-1c0c-45e4-a0c6-4e6d88c4dfb5",
+                    "path": "<Keyboard>/ctrl",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "WeaponWarp",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
