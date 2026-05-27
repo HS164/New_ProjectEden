@@ -3168,19 +3168,29 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 355960402988361258, guid: bec916380ddc5c64695014f2ab91d970,
         type: 3}
-      propertyPath: moveSensitivity.acceleration
-      value: 0.15
+      propertyPath: ascendingGravityScale
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 355960402988361258, guid: bec916380ddc5c64695014f2ab91d970,
         type: 3}
-      propertyPath: moveSensitivity.startSensitivity
-      value: 5
+      propertyPath: autoJumpDetectRange.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 355960402988361258, guid: bec916380ddc5c64695014f2ab91d970,
+        type: 3}
+      propertyPath: descendingGravityScale
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 418731805914451713, guid: bec916380ddc5c64695014f2ab91d970,
         type: 3}
       propertyPath: rightHandPoint
       value: 
       objectReference: {fileID: 711680013}
+    - target: {fileID: 858976515617801369, guid: bec916380ddc5c64695014f2ab91d970,
+        type: 3}
+      propertyPath: m_Drag
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3528744360216756940, guid: bec916380ddc5c64695014f2ab91d970,
         type: 3}
       propertyPath: m_Name
