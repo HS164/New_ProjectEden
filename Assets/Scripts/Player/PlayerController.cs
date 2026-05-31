@@ -13,6 +13,11 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
     [SerializeField] private MoveSensitivity moveSensitivity;
     // ジャンプに関するパラメータ
     [SerializeField] private PlayerJump playerJump;
+    [SerializeField] private Vector3 autoJumpDetectRange;
+    [SerializeField] private float ascendingGravityScale;
+    [SerializeField] private float descendingGravityScale;
+    private float gravityScale = 1;
+    private float initialGravityScale = 1;
     // エアアクセルに関するパラメータ
     [SerializeField] private PlayerAirAccele playerAirAccele;
 
@@ -58,11 +63,14 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
     private bool isStunned = false;
     private bool isTargetingEnemy = false;
     private bool isTargetingWeapon = false;
+    private bool autoJumpFlag = false;
 
     private PlayerInput_Controller.PlayerInputActions input;
 
     // ターゲットとなるオブジェクトを取得
     SelectableObjectManager selectableManager;
+
+    CancellationTokenSource jumpCTS;
 
     public float CurrentHp
     {
@@ -84,6 +92,8 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         playerJump.Reset();
         playerAirAccele.Reset();
         isTargetingWeapon = true;
+
+        rbody.useGravity = false;
 
         attackableTimer = new PlayerAttackCoolTimer(attackCoolTime, overDriveTime);
         attackableTimer.SetPlayer(this.gameObject.transform);
@@ -115,15 +125,30 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
 
     private void Update()
     {
-        if(isDead) 
+        if (isDead) 
         {
             return;
+        }
+
+        if (input.Jump.WasPressedThisFrame() && playerJump.IsJump() && !playerJump.CanJump() && IsNearLand())
+        {
+            autoJumpFlag = true;
+            Debug.Log("prep jump3");
         }
 
         if (IsLand())
         {
             playerJump.Reset();
             playerAirAccele.Reset();
+            gravityScale = initialGravityScale;
+
+            if (autoJumpFlag)
+            {
+                rbody.linearVelocity = new Vector3(rbody.linearVelocity.x, 0, rbody.linearVelocity.z);
+                playerJump.CountUpJump();
+                Jump();
+                autoJumpFlag = false;
+            }
         }
 
         if (isStunned)
@@ -234,6 +259,11 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         // ---------------------------ここまで---------------------------
     }
 
+    private void FixedUpdate()
+    {
+        rbody.AddForce(Physics.gravity * gravityScale, ForceMode.Acceleration);
+    }
+
     async UniTask WarpFloat()
     {
         float endTime = Time.time + warpFloatTime;
@@ -321,7 +351,24 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         Debug.Log("Jump");
         rbody.AddForce(new Vector3(0, playerJump.Power, 0), ForceMode.Impulse);
 
+        jumpCTS?.Cancel();
+        jumpCTS?.Dispose();
+        jumpCTS = new CancellationTokenSource();
+        gravityScale = ascendingGravityScale;
+        JumpGravity(jumpCTS.Token).Forget();
+
         playerJump.DelayGroundJudgement().Forget();
+    }
+
+    // ジャンプの上昇中
+    private async UniTaskVoid JumpGravity(CancellationToken token)
+    {
+        await UniTask.WaitForSeconds(0.5f, cancellationToken: token);
+        while (rbody.linearVelocity.y > 0)
+        {
+            await UniTask.Yield();
+        }
+        gravityScale = descendingGravityScale;
     }
 
     private bool IsLand()
@@ -337,6 +384,26 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
             -transform.up,
             Quaternion.identity,
             0.01f)
+            .Select(hit => hit.transform)
+            .Where(hit => hit.GetComponent<IPlatformer>() != null)
+            .ToList();
+        return hits.Count > 0;
+    }
+
+    // 先行入力判定の簡易版
+    private bool IsNearLand()
+    {
+        if (!playerJump.CanGroundJudgement())
+        {
+            return false;
+        }
+
+        var hits = Physics.BoxCastAll(
+            transform.position - transform.up - autoJumpDetectRange,
+            Vector3.one * 2,
+            -transform.up,
+            Quaternion.identity,
+            1f)
             .Select(hit => hit.transform)
             .Where(hit => hit.GetComponent<IPlatformer>() != null)
             .ToList();
@@ -386,6 +453,11 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         var dir = new Vector3(transform.position.x - cameraObj.transform.position.x, 0, transform.position.z - cameraObj.transform.position.z);
         rbody.AddForce(dir * playerAirAccele.Power, ForceMode.Impulse);
         transform.rotation = Quaternion.LookRotation(dir);
+        jumpCTS?.Cancel();
+        jumpCTS?.Dispose();
+        jumpCTS = new CancellationTokenSource();
+        gravityScale = ascendingGravityScale;
+        JumpGravity(jumpCTS.Token).Forget();
     }
 
     // ターゲットを取得

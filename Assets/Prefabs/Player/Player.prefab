@@ -44,6 +44,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5e27a27bfbebad84080fb284e85b8b44, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  rightHandPoint: {fileID: 0}
+  leftHandPoint: {fileID: 0}
+  bothHandsPoint: {fileID: 0}
 --- !u!1 &1706638616262814312
 GameObject:
   m_ObjectHideFlags: 0
@@ -406,6 +409,7 @@ MonoBehaviour:
     maxTimes: 2
     times: 0
     canGroundJudgement: 0
+  autoJumpDetectRange: {x: 0, y: 0, z: 0}
   playerAirAccele:
     accelePower: 2
     maxTimes: 1
@@ -413,7 +417,6 @@ MonoBehaviour:
   cameraObj: {fileID: 0}
   searchRadius: 10
   attackRange: 1
-  dashSpeed: 1.5
   weaponManager: {fileID: 418731805914451713}
   lineRenderer: {fileID: 4768203687724291374}
   playerShadowPrefab: {fileID: 9080439654648588947, guid: 6e2f4c0d95f6d4b449080e555e9e8407,
@@ -428,6 +431,7 @@ MonoBehaviour:
   attackBox: {fileID: 3280359950559448302}
   overDriveTime: 10
   kronoEndTime: 7
+  warpFloatTime: 1
   maxHP: 100
   currentHP: 0
   atk: 5
