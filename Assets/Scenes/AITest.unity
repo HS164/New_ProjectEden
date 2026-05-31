@@ -580,7 +580,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enemyPrefab: {fileID: 7565421987800342656, guid: 24d643972ec82794298b1a447a3a3e15,
     type: 3}
-  spawnPosition: {x: 0, y: 1.66, z: 0}
+  spawnPosition: {x: 0, y: 5, z: 0}
 --- !u!4 &430438932
 Transform:
   m_ObjectHideFlags: 0
@@ -851,6 +851,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Player
+      objectReference: {fileID: 0}
+    - target: {fileID: 3528744360216756940, guid: bec916380ddc5c64695014f2ab91d970,
+        type: 3}
+      propertyPath: m_Layer
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 7455311882551154156, guid: bec916380ddc5c64695014f2ab91d970,
         type: 3}

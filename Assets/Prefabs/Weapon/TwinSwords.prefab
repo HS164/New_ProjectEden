@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 9063825450093768262}
   - component: {fileID: 1410670997480508120}
   - component: {fileID: 7444948796368592398}
-  - component: {fileID: 3798347886754442819}
   m_Layer: 0
   m_Name: TwinSwords
   m_TagString: Untagged
@@ -109,18 +108,3 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &3798347886754442819
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3529125518031141319}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ee34f99838eaac9428f858724703a6cc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  weaponData: {fileID: 11400000, guid: b0f8736ff62e501488ded2b9c1e28590, type: 2}
-  delayReleaseTime: 2
-  destroyTime: 10

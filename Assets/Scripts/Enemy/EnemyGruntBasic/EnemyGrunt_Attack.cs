@@ -22,7 +22,7 @@ public partial class EnemyGrunt
                 }
             }
             
-            if(!Context.isAttacking)
+            if(!Context.isAttacking && !Context.isDamaged)
             {
                 Context.EvaluateCombatState();
             }

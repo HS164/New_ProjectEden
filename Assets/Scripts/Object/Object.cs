@@ -1,4 +1,4 @@
-using DocumentFormat.OpenXml.Office2013.Drawing.Chart;
+﻿using DocumentFormat.OpenXml.Office2013.Drawing.Chart;
 using UnityEngine;
 using static IPlayerSelectable;
 
@@ -72,7 +72,7 @@ public class Object : MonoBehaviour, IPlayerSelectable, IDamageable
         IsSelect = false;
     }
 
-    public bool Damage(float damage)
+    public bool Damage(float damage, Vector3 hitPosition)
     {
         currentHP -= damage;
         if (currentHP <= 0)

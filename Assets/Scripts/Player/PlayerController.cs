@@ -19,10 +19,10 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
     [SerializeField] private Transform cameraObj;
     [SerializeField] private float searchRadius = 10f;
     [SerializeField, ReadOnly] private float attackRange = 1f;
-    [SerializeField] private float dashSpeed = 1.5f;
 
     // 武器を拾うシステム
     [SerializeField] private WeaponManager weaponManager;
+    private SelectableWeaponBase currentWeapon = null;
 
     // ワープターゲットを可視化する線
     [SerializeField] private LineRenderer lineRenderer;
@@ -30,7 +30,6 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
     // 幻影残身 の値
     [SerializeField] private GameObject playerShadowPrefab;
     [SerializeField] private float shadowSpawnInterval = 1;
-    private bool isDashing = false;
 
     // タイムシフトステップ　の値
     [SerializeField] private GameObject timeShiftEffect;
@@ -41,22 +40,29 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
 
     // 攻撃後隙の時間
     [SerializeField] private float attackCoolTime;
+    [SerializeField] private GameObject attackBox;
     private PlayerAttackCoolTimer attackableTimer;
 
     [SerializeField] private float overDriveTime = 10f;
     [SerializeField] private float kronoEndTime = 7f;
+    [SerializeField] private float warpFloatTime = 1f;
     private PlayerKronoEnd kronoEnd;
     private bool isKronoEnd = false;
 
     // パラメータ
-    [SerializeField] private float maxHP = 10f;
+    [SerializeField] private float maxHP;
     [SerializeField, ReadOnly] private float currentHP;
     [SerializeField, ReadOnly] private float atk = 5;
 
-    private bool isFixed = false;
     private bool isDead = false;
+    private bool isStunned = false;
+    private bool isTargetingEnemy = false;
+    private bool isTargetingWeapon = false;
 
     private PlayerInput_Controller.PlayerInputActions input;
+
+    // ターゲットとなるオブジェクトを取得
+    SelectableObjectManager selectableManager;
 
     public float CurrentHp
     {
@@ -77,9 +83,11 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         moveSensitivity.Init();
         playerJump.Reset();
         playerAirAccele.Reset();
+        isTargetingWeapon = true;
 
         attackableTimer = new PlayerAttackCoolTimer(attackCoolTime, overDriveTime);
         attackableTimer.SetPlayer(this.gameObject.transform);
+        attackBox.SetActive(false);
         kronoEnd = new PlayerKronoEnd(kronoEndTime);
 
         lineRenderer.positionCount = 2;
@@ -88,6 +96,10 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         lineRenderer.startColor = Color.yellow;
         lineRenderer.endColor = Color.yellow;
         lineRenderer.enabled = false;
+
+        selectableManager = SelectableObjectManager.instance;
+        selectableManager.SetTargetType(SelectableType.GIMMICK);
+        Cursor.lockState = CursorLockMode.Locked;
     }
 
     private void OnEnable()
@@ -114,63 +126,93 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
             playerAirAccele.Reset();
         }
 
-        // プレイヤーが固定されているとき(密着時)
-        if (!isFixed)
+        if (isStunned)
         {
-            if (playerJump.IsJump())
+            return;
+        }
+
+        // new inputs
+
+        if (currentWeapon != null)
+        {
+            if (input.WeaponWarp.IsPressed() && !isTargetingEnemy && !isTargetingWeapon)
             {
-                if (playerAirAccele.CanAction() && input.AirAccele.WasPressedThisFrame())
-                {
-                    playerAirAccele.CountUpAction();
-                    AirAccele();
-                }
+                isTargetingWeapon = true;
+                selectableManager.SetTargetType(SelectableType.GIMMICK);
             }
-            if (input.Move.ReadValue<Vector2>().magnitude > 0.1f)
+            else if (input.EnemyWarp.IsPressed() && !isTargetingEnemy && !isTargetingWeapon && currentWeapon is not GunWeapon)
             {
-                Move();
+                isTargetingEnemy = true;
+                selectableManager.SetTargetType(SelectableType.ENEMY);
             }
 
-            if (input.Jump.WasPressedThisFrame())
+            if (input.WeaponWarp.WasReleasedThisFrame() && isTargetingWeapon)
             {
-                if (playerJump.CanJump())
-                {
-                    playerJump.CountUpJump();
-                    Jump();
-                }
+                isTargetingWeapon = false;
+                selectableManager.SetTargetType(SelectableType.NONE);
             }
-            if (input.Sprint.WasPressedThisFrame())
+            else if(input.EnemyWarp.WasReleasedThisFrame() && isTargetingEnemy)
             {
-                Debug.Log("ダッシュ開始");
-
-                isDashing = true;
-            }
-            if(input.Sprint.WasReleasedThisFrame())
-            {
-                Debug.Log("ダッシュ中断");
-
-                isDashing = false;
-            }
-            if(input.TimeShift.WasPressedThisFrame() && !isTimeShifting)
-            {
-                TimeShift().Forget();
+                isTargetingEnemy = false;
+                selectableManager.SetTargetType(SelectableType.NONE);
             }
         }
-        else
-        {
-            if(input.Attack.WasPressedThisFrame())
-            {
-                Attack();
-            }
-            if (input.ReleaseTarget.WasPressedThisFrame())
-            {
-                ReleaseTarget();
-            }
-            if (input.Sprint.WasReleasedThisFrame())
-            {
-                Debug.Log("ダッシュ中断");
 
-                isDashing = false;
+        if (input.Attack.WasPressedThisFrame())
+        {
+            if (currentWeapon == null)
+            {
+                // weapon warp check
+                TelepotationTarget();
+                return;
             }
+
+            if (isTargetingWeapon)
+            {
+                // warp check
+                TelepotationTarget();
+                return;
+            }
+            else if (isTargetingEnemy)
+            {
+                // enemy warp check
+                TelepotationTarget();
+                return;
+            }
+
+            Attack();
+        }
+
+
+        if (playerJump.IsJump())
+        {
+            if (playerAirAccele.CanAction() && input.AirAccele.WasPressedThisFrame())
+            {
+                playerAirAccele.CountUpAction();
+                AirAccele();
+            }
+        }
+        if (input.Move.ReadValue<Vector2>().magnitude > 0.1f)
+        {
+            Move();
+        }
+        if (input.Jump.WasPressedThisFrame())
+        {
+            if (playerJump.CanJump())
+            {
+                playerJump.CountUpJump();
+                Jump();
+            }
+        }
+
+        if (input.TimeShift.WasPressedThisFrame() && !isTimeShifting)
+        {
+            TimeShift().Forget();
+        }
+
+        if (input.Move.ReadValue<Vector2>().magnitude < 0.1f)
+        {
+            moveSensitivity.Reset();
         }
 
         SearchTarget();
@@ -192,6 +234,22 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         // ---------------------------ここまで---------------------------
     }
 
+    async UniTask WarpFloat()
+    {
+        float endTime = Time.time + warpFloatTime;
+
+        // Use while to wait until time passes
+        while (Time.time < endTime)
+        {
+            if (input.Move.IsPressed())
+            {
+                break;
+            }
+            await UniTask.Yield();
+        }
+        rbody.isKinematic = false;
+    }
+
     // プレイヤー移動
     private void Move()
     {
@@ -200,10 +258,6 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         var dir = Quaternion.Euler(0, cameraObj.transform.eulerAngles.y, 0);
         var moveDirection = dir * inputDir;
         /****              ここまで                ****/
-        if (isDashing)
-        {
-            moveDirection *= dashSpeed;
-        }
         if(isTimeShifting)
         {
             moveDirection *= playerTimeScale / Time.timeScale;
@@ -215,7 +269,6 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         var moveVelocity = moveDirection * moveSensitivity.Sensitivity;
         rbody.linearVelocity = new Vector3(moveVelocity.x, rbody.linearVelocity.y, moveVelocity.z);
         transform.rotation = Quaternion.LookRotation(moveDirection);
-        //Debug.Log(rbody.linearVelocity);
     }
 
     private void Attack()
@@ -240,7 +293,7 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         {
             Debug.Log(hit.gameObject.name);
             var damageObj = hit.GetComponent<IDamageable>();
-            var death = damageObj.Damage(atk);
+            var death = damageObj.Damage(atk, transform.position);
             // 神速パワーアップ
             PlayerPowerManager.Instance.ChargeGauge();
             // スピードリンク発動
@@ -251,15 +304,16 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
                 if (selectableObj != null)
                 {
                     selectableObj.OnRelease();
-                    isFixed = false;
-                    Debug.Log("fixed");
                 }
                 damageObj.Death();
             }
         }
 
-        // 攻撃の後隙を開始する
+        // 攻撃中に、攻撃処理が行われないようにするための待機処理
         attackableTimer.StartAttackCoolDown();
+
+        // 攻撃アニメーションの終了を待機する
+        ViewAttackAnimation().Forget();
     }
 
     private void Jump()
@@ -289,19 +343,21 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         return hits.Count > 0;
     }
 
-    private void ReleaseTarget()
-    {
-        SelectableObjectManager.instance.ReleaseTarget();
-        isFixed = false;
-    }
-
-    public bool Damage(float damage)
+    public bool Damage(float damage, Vector3 hitPosition)
     {
         currentHP -= damage;
+
         if (currentHP <= 0)
         {
             return true;
         }
+
+        isStunned = true;
+
+        rbody.AddForce((transform.position + Vector3.up - hitPosition).normalized * 5f, ForceMode.Impulse);
+
+        ResetHitStun(0.2f).Forget();
+
         return false;
     }
 
@@ -317,12 +373,12 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         Vector3 currentPos = transform.position;
         Vector3 warpPos;
         rbody.linearVelocity = Vector3.zero;
+        moveSensitivity.Reset();
         var dir = new Vector3(targetObj.position.x, 0, targetObj.position.z) - new Vector3(transform.position.x, 0, transform.position.z);
         transform.rotation = Quaternion.LookRotation(dir);
         warpPos = targetObj.position - dir.normalized;
         transform.position = warpPos;
         WarpShadow(currentPos, warpPos);
-        isFixed = true;
     }
 
     private void AirAccele()
@@ -335,11 +391,7 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
     // ターゲットを取得
     private void SearchTarget()
     {
-        // ターゲットとなるオブジェクトを取得
-        var selectableManager = SelectableObjectManager.instance;
         var target = selectableManager.GetTargetObject();
-        bool isInteract = false;
-
         if (target != null)
         {
             lineRenderer.enabled = true;
@@ -350,41 +402,42 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         {
             lineRenderer.enabled = false;
         }
+    }
 
+    private void TelepotationTarget()
+    {
         if (attackableTimer.nonAttackable)
         {
             return;
         }
 
-        if (isFixed)
+        var target = selectableManager.GetTargetObject();
+
+        if (target != null)
         {
-            isInteract = input.Interact.WasPressedThisFrame();
-        }
-        else
-        {
-            isInteract = input.Attack.WasPressedThisFrame();
-        }
-        if (isInteract)
-        {
-            if (target != null)
+            selectableManager.SelectTarget(target);
+            Teleportation(target);
+            var weapon = target.GetComponent<IWeaponAccessor>();
+            if (weapon != null)
             {
-                selectableManager.SelectTarget(target);
-                Teleportation(target);
-                var weapon = target.GetComponent<IWeaponAccessor>();
-                if (weapon != null)
+                weaponManager.ChangeWeapon(weapon);
+                currentWeapon = target.GetComponent<SelectableWeaponBase>();
+                var weaponData = currentWeapon.GetWeaponData();
+                if (weaponData != null)
                 {
-                    weaponManager.ChangeWeapon(weapon);
-                    var weaponData = target.GetComponent<SelectableWeaponBase>().GetWeaponData();
-                    if (weaponData != null)
-                    {
-                        atk = weaponData.damage;
-                        attackRange = weaponData.attackRange;
-                    }
+                    atk = weaponData.damage;
+                    attackRange = weaponData.attackRange;
                 }
-                else
-                {
-                    Attack();
-                }
+                isTargetingWeapon = false;
+                selectableManager.SetTargetType(SelectableType.NONE);
+            }
+            else
+            {
+                Attack();
+                rbody.isKinematic = true;
+                WarpFloat().Forget();
+                isTargetingEnemy = false;
+                selectableManager.SetTargetType(SelectableType.NONE);
             }
         }
     }
@@ -456,6 +509,29 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         Destroy(prefab);
     }
 
+    /// <summary>
+    /// 攻撃状態の可視化の制御
+    /// </summary>
+    /// <returns></returns>
+    private async UniTaskVoid ViewAttackAnimation()
+    {
+        // 攻撃判定の可視化（攻撃アニメーションがある場合、それを再生）
+        attackBox.SetActive(true);
+        float interval = attackCoolTime / 5;
+        float timeoutTimer = 0;
+
+        while (attackableTimer.nonAttackable)
+        {
+            // 攻撃不可能な時間は待機し続ける
+            await UniTask.Delay(TimeSpan.FromSeconds(interval), true);
+            timeoutTimer += interval;
+            // タイムアウトしたらループを抜ける
+            if (timeoutTimer > attackCoolTime + 1f) break;
+        }
+
+        attackBox.SetActive(false);
+    }
+
     // オーバードライブ起動
     private void ActiveOverDrive()
     {
@@ -464,6 +540,17 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
             return;
         }
         attackableTimer.ChangeOverDrive();
+    }
+
+    /// <summary>
+    /// スタンのクールタイム
+    /// </summary>
+    /// <param name="strafeCooldown"></param>
+    /// <returns></returns>
+    private async UniTaskVoid ResetHitStun(float hitStunTime)
+    {
+        await UniTask.WaitForSeconds(hitStunTime);
+        isStunned = false;
     }
 
     // クロノ・エンド起動
@@ -486,7 +573,7 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
             Debug.Log("finish Krono End");
             // 終了時、HPの半分のダメージをくらう
             float damage = currentHP / 2;
-            Damage(damage);
+            Damage(damage, transform.position);
         }
 
         isKronoEnd = false;

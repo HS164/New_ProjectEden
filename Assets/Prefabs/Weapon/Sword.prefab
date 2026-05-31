@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 695269892056544562}
   - component: {fileID: 8045418140371707506}
   - component: {fileID: 3390041361594653726}
-  - component: {fileID: 7836901295146818216}
+  - component: {fileID: 2790493176175919192}
   m_Layer: 0
   m_Name: Sword
   m_TagString: Untagged
@@ -109,7 +109,7 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &7836901295146818216
+--- !u!114 &2790493176175919192
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -118,9 +118,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 5496976041521114491}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ee34f99838eaac9428f858724703a6cc, type: 3}
+  m_Script: {fileID: 11500000, guid: a5173c2b9ac66524a84c9a086a94b9cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   weaponData: {fileID: 11400000, guid: 8feab1d81aa9a9244866e3083202cb25, type: 2}
+  weaponSlot: 0
+  holdPositionOffset: {x: 0, y: 0, z: 0}
+  holdRotationOffset: {x: 0, y: 0, z: 0}
   delayReleaseTime: 2
   destroyTime: 10

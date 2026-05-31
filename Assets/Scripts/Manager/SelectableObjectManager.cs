@@ -15,6 +15,8 @@ public class SelectableObjectManager : MonoBehaviour
     private IPlayerSelectable beforeWatched = null;
     // 前回選択したオブジェクトを保持
     private IPlayerSelectable beforeSelected = null;
+    // 選択するオブジェクトの種類
+    private SelectableType targetType = SelectableType.NONE;
 
     private void Awake()
     {
@@ -50,6 +52,11 @@ public class SelectableObjectManager : MonoBehaviour
         return targetObject;
     }
 
+    public void SetTargetType(SelectableType type)
+    {
+        targetType = type;
+    }
+
     public IPlayerSelectable GetBeforeWatched()
     {
         return beforeWatched;
@@ -63,6 +70,12 @@ public class SelectableObjectManager : MonoBehaviour
     // カメラ上のオブジェクトを選択するメソッド
     private Transform SearchCenterTarget()
     {
+        if (targetType == SelectableType.NONE)
+        {
+            beforeWatched?.AllowSelection(false);
+            return null;
+        }
+
         float search_radius = 10f;
         // center指定した大正からSphereCastでhitしたものを取得
         var hits = Physics.SphereCastAll(
@@ -129,6 +142,7 @@ public class SelectableObjectManager : MonoBehaviour
         })
         .Where(hit => hit.GetComponent<IPlayerSelectable>() != null)
         .Where(hit => !hit.GetComponent<IPlayerSelectable>().IsSelect)
+        .Where(hit => hit.GetComponent<IPlayerSelectable>().GetSelectableType() == targetType)
         .ToList();
     }
 
@@ -143,6 +157,11 @@ public class SelectableObjectManager : MonoBehaviour
             // 前回のオブジェクトと今回のオブジェクトが違う場合
             // 選択候補になっているオブジェクトを入れ替え
             beforeWatched.AllowSelection(false);
+            nowWatch.AllowSelection(true);
+            beforeWatched = nowWatch;
+        }
+        else if (existBeforeWatched && beforeWatched == nowWatch)
+        {
             nowWatch.AllowSelection(true);
             beforeWatched = nowWatch;
         }

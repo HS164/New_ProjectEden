@@ -40,7 +40,7 @@ public class ProjectileBase : MonoBehaviour, IProjectile
         IDamageable damageable = other.GetComponent<IDamageable>();
         if(damageable != null)
         {
-            damageable.Damage(bulletDamage);
+            damageable.Damage(bulletDamage, transform.position);
             cts.Cancel();
             Destroy(gameObject);
         }

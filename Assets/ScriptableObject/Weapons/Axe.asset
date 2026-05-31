@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: febd5909aeb52fb45869badbee0685df, type: 3}
-  m_Name: Hammer
+  m_Name: Axe
   m_EditorClassIdentifier: 
-  weaponName: Hammer
+  weaponName: Axe
   damage: 20
   attackSpeed: 1
   attackRange: 2

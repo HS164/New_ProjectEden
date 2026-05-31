@@ -200,9 +200,18 @@ public partial class @PlayerInput_Controller: IInputActionCollection2, IDisposab
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""Sprint"",
+                    ""name"": ""EnemyWarp"",
                     ""type"": ""Button"",
-                    ""id"": ""988aafcb-4dc9-4f49-9b3a-183fe452227f"",
+                    ""id"": ""1762aa09-c709-4eb0-933d-557f26f9081c"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""WeaponWarp"",
+                    ""type"": ""Button"",
+                    ""id"": ""884e5dd3-4ff5-4305-ba44-582e6a0ad4a5"",
                     ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
@@ -630,12 +639,23 @@ public partial class @PlayerInput_Controller: IInputActionCollection2, IDisposab
                 },
                 {
                     ""name"": """",
-                    ""id"": ""b858d402-0d55-481d-9e9b-2a962a2d92d1"",
+                    ""id"": ""110e875b-c277-4566-9364-6eb13061bdbb"",
                     ""path"": ""<Keyboard>/leftShift"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""Sprint"",
+                    ""action"": ""EnemyWarp"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""8ad20663-1c0c-45e4-a0c6-4e6d88c4dfb5"",
+                    ""path"": ""<Keyboard>/ctrl"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""WeaponWarp"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -658,7 +678,8 @@ public partial class @PlayerInput_Controller: IInputActionCollection2, IDisposab
         m_PlayerInput_TimeShift = m_PlayerInput.FindAction("TimeShift", throwIfNotFound: true);
         m_PlayerInput_OverDrive = m_PlayerInput.FindAction("OverDrive", throwIfNotFound: true);
         m_PlayerInput_ChronoEnd = m_PlayerInput.FindAction("ChronoEnd", throwIfNotFound: true);
-        m_PlayerInput_Sprint = m_PlayerInput.FindAction("Sprint", throwIfNotFound: true);
+        m_PlayerInput_EnemyWarp = m_PlayerInput.FindAction("EnemyWarp", throwIfNotFound: true);
+        m_PlayerInput_WeaponWarp = m_PlayerInput.FindAction("WeaponWarp", throwIfNotFound: true);
     }
 
     ~@PlayerInput_Controller()
@@ -751,7 +772,8 @@ public partial class @PlayerInput_Controller: IInputActionCollection2, IDisposab
     private readonly InputAction m_PlayerInput_TimeShift;
     private readonly InputAction m_PlayerInput_OverDrive;
     private readonly InputAction m_PlayerInput_ChronoEnd;
-    private readonly InputAction m_PlayerInput_Sprint;
+    private readonly InputAction m_PlayerInput_EnemyWarp;
+    private readonly InputAction m_PlayerInput_WeaponWarp;
     /// <summary>
     /// Provides access to input actions defined in input action map "PlayerInput".
     /// </summary>
@@ -812,9 +834,13 @@ public partial class @PlayerInput_Controller: IInputActionCollection2, IDisposab
         /// </summary>
         public InputAction @ChronoEnd => m_Wrapper.m_PlayerInput_ChronoEnd;
         /// <summary>
-        /// Provides access to the underlying input action "PlayerInput/Sprint".
+        /// Provides access to the underlying input action "PlayerInput/EnemyWarp".
         /// </summary>
-        public InputAction @Sprint => m_Wrapper.m_PlayerInput_Sprint;
+        public InputAction @EnemyWarp => m_Wrapper.m_PlayerInput_EnemyWarp;
+        /// <summary>
+        /// Provides access to the underlying input action "PlayerInput/WeaponWarp".
+        /// </summary>
+        public InputAction @WeaponWarp => m_Wrapper.m_PlayerInput_WeaponWarp;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -877,9 +903,12 @@ public partial class @PlayerInput_Controller: IInputActionCollection2, IDisposab
             @ChronoEnd.started += instance.OnChronoEnd;
             @ChronoEnd.performed += instance.OnChronoEnd;
             @ChronoEnd.canceled += instance.OnChronoEnd;
-            @Sprint.started += instance.OnSprint;
-            @Sprint.performed += instance.OnSprint;
-            @Sprint.canceled += instance.OnSprint;
+            @EnemyWarp.started += instance.OnEnemyWarp;
+            @EnemyWarp.performed += instance.OnEnemyWarp;
+            @EnemyWarp.canceled += instance.OnEnemyWarp;
+            @WeaponWarp.started += instance.OnWeaponWarp;
+            @WeaponWarp.performed += instance.OnWeaponWarp;
+            @WeaponWarp.canceled += instance.OnWeaponWarp;
         }
 
         /// <summary>
@@ -927,9 +956,12 @@ public partial class @PlayerInput_Controller: IInputActionCollection2, IDisposab
             @ChronoEnd.started -= instance.OnChronoEnd;
             @ChronoEnd.performed -= instance.OnChronoEnd;
             @ChronoEnd.canceled -= instance.OnChronoEnd;
-            @Sprint.started -= instance.OnSprint;
-            @Sprint.performed -= instance.OnSprint;
-            @Sprint.canceled -= instance.OnSprint;
+            @EnemyWarp.started -= instance.OnEnemyWarp;
+            @EnemyWarp.performed -= instance.OnEnemyWarp;
+            @EnemyWarp.canceled -= instance.OnEnemyWarp;
+            @WeaponWarp.started -= instance.OnWeaponWarp;
+            @WeaponWarp.performed -= instance.OnWeaponWarp;
+            @WeaponWarp.canceled -= instance.OnWeaponWarp;
         }
 
         /// <summary>
@@ -1055,11 +1087,18 @@ public partial class @PlayerInput_Controller: IInputActionCollection2, IDisposab
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnChronoEnd(InputAction.CallbackContext context);
         /// <summary>
-        /// Method invoked when associated input action "Sprint" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// Method invoked when associated input action "EnemyWarp" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
         /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnSprint(InputAction.CallbackContext context);
+        void OnEnemyWarp(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "WeaponWarp" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnWeaponWarp(InputAction.CallbackContext context);
     }
 }

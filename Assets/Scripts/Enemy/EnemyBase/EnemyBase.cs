@@ -78,7 +78,7 @@ public partial class EnemyBase : SelectableEnemyBase, IDamageable, IEnemy
     /// IDamageのダメージ関数、攻撃受けた時用
     /// </summary>
     /// <param name="damageValue"></param>
-    public virtual bool Damage(float damageValue)
+    public virtual bool Damage(float damageValue, Vector3 hitPosition)
     {
         Debug.Log("enemy hit");
         return false;
