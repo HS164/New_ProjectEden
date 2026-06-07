@@ -1,7 +1,9 @@
-﻿using Cysharp.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -58,6 +60,11 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
     [SerializeField] private float maxHP;
     [SerializeField, ReadOnly] private float currentHP;
     [SerializeField, ReadOnly] private float atk = 5;
+
+    private Vector3 horizontalVelocity = Vector3.zero;
+    // 接触しているオブジェクトの法線ベクトルをMap形式で管理、コライダーのIDをkeyとして扱う
+    // 変数の再代入ができないようにreadonlyで宣言(Javaのfinal)
+    private readonly Dictionary<int, Vector3> wallContactNormals = new Dictionary<int, Vector3>();
 
     private bool isDead = false;
     private bool isStunned = false;
@@ -235,9 +242,14 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
             TimeShift().Forget();
         }
 
+        // 移動スティックを話しているときの処理
         if (input.Move.ReadValue<Vector2>().magnitude < 0.1f)
         {
             moveSensitivity.Reset();
+            // ここでVector3.zeroに向かって少しずつ減速
+            // y軸の移動のみ、linearVelocityを使用して落下などの挙動が損なわれないようにしている
+            horizontalVelocity = Vector3.MoveTowards(horizontalVelocity, Vector3.zero, moveSensitivity.DecelerationRate * Time.deltaTime);
+            rbody.linearVelocity = new Vector3(horizontalVelocity.x, rbody.linearVelocity.y, horizontalVelocity.z);
         }
 
         SearchTarget();
@@ -280,25 +292,65 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         rbody.isKinematic = false;
     }
 
-    // プレイヤー移動
+    /// <summary>
+    /// プレイヤーの水平移動を処理する。加速・減速・反転摩擦・壁スライド・スムーズ回転を含む
+    /// </summary>
     private void Move()
     {
-        var moveAmt = input.Move.ReadValue<Vector2>();
-        var inputDir = new Vector3(moveAmt.x, 0, moveAmt.y);
-        var dir = Quaternion.Euler(0, cameraObj.transform.eulerAngles.y, 0);
-        var moveDirection = dir * inputDir;
-        /****              ここまで                ****/
-        if(isTimeShifting)
+        // 入力方向をカメラ基準のワールド座標へ変換
+        Vector2 moveAmt = input.Move.ReadValue<Vector2>();
+        Vector3 inputDir = new Vector3(moveAmt.x, 0, moveAmt.y);
+        Quaternion camRot = Quaternion.Euler(0, cameraObj.transform.eulerAngles.y, 0);
+        // 入力情報とカメラの向きから実際に進みたい方向を決定
+        Vector3 desiredDirection = camRot * inputDir;
+        float accelRate = moveSensitivity.AccelerationRate;
+
+        // タイムスケール補正：スロー状態でもプレイヤー本人は通常速度を維持する
+        float speedMultiplier = 1f;
+        if (isTimeShifting)
         {
-            moveDirection *= playerTimeScale / Time.timeScale;
+            speedMultiplier = playerTimeScale / Time.timeScale;
         }
-        if(isKronoEnd)
+        if (isKronoEnd)
         {
-            moveDirection *= 1.0f / Time.timeScale;
+            speedMultiplier = 1.0f / Time.timeScale;
         }
-        var moveVelocity = moveDirection * moveSensitivity.Sensitivity;
-        rbody.linearVelocity = new Vector3(moveVelocity.x, rbody.linearVelocity.y, moveVelocity.z);
-        transform.rotation = Quaternion.LookRotation(moveDirection);
+
+        Vector3 targetVelocity = desiredDirection * moveSensitivity.MaxSpeed * speedMultiplier;
+
+        // 反転入力時は摩擦倍率を加えて素早く切り返す
+        // Vector3.Dotで二つのベクトルの比較、値が -1 に近いほど切り返しが行われたと判定できる
+        if (horizontalVelocity.sqrMagnitude > 0.01f &&
+            Vector3.Dot(horizontalVelocity.normalized, desiredDirection.normalized) < -0.1f)
+        {
+            accelRate *= moveSensitivity.ReversalFriction;
+        }
+
+        // 第1引数から第2引数に向かって、第3引数の距離だけ近づける関数
+        // 毎フレーム少しずつ targetVelocity に近づくことで、滑らかな加速が生まれる。
+        horizontalVelocity = Vector3.MoveTowards(horizontalVelocity, targetVelocity, accelRate * Time.deltaTime);
+
+        // 壁スライド：壁への押し込み成分のみ除去して壁面に沿って滑る
+        // Vector3.ProjectOnPlane(velocity, normal) とは： 速度ベクトルから「壁の法線方向の成分だけを取り除く」関数
+        // 壁に向かって走っても「壁に突っ込む分の速度」が消えて「壁に平行な分だけ」が残るため、これによって壁に沿って滑るように動ける。
+        Vector3 finalVelocity = horizontalVelocity;
+        foreach (KeyValuePair<int, Vector3> kv in wallContactNormals)
+        {
+            if (Vector3.Dot(finalVelocity, kv.Value) < 0)
+            {
+                finalVelocity = Vector3.ProjectOnPlane(finalVelocity, kv.Value);
+            }
+        }
+
+        rbody.linearVelocity = new Vector3(finalVelocity.x, rbody.linearVelocity.y, finalVelocity.z);
+
+        // 移動入力がある間はスムーズに向きを変える
+        if (desiredDirection.sqrMagnitude > 0.01f)
+        {
+            // 瞬時に向きを変えるのではなく、RotateTowardsを使用して、滑らかに向きが変わるように修正
+            Quaternion targetRot = Quaternion.LookRotation(desiredDirection);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRot, moveSensitivity.TurnSpeed * Time.deltaTime);
+        }
     }
 
     private void Attack()
@@ -440,6 +492,7 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         Vector3 currentPos = transform.position;
         Vector3 warpPos;
         rbody.linearVelocity = Vector3.zero;
+        horizontalVelocity = Vector3.zero;
         moveSensitivity.Reset();
         var dir = new Vector3(targetObj.position.x, 0, targetObj.position.z) - new Vector3(transform.position.x, 0, transform.position.z);
         transform.rotation = Quaternion.LookRotation(dir);
@@ -448,11 +501,25 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         WarpShadow(currentPos, warpPos);
     }
 
+    /// <summary>
+    /// 空中での追加加速（エアアクセル）処理。カメラから見てプレイヤーの前方にブーストをかける
+    /// </summary>
     private void AirAccele()
     {
+        // カメラから見たプレイヤーの方向を取得
         var dir = new Vector3(transform.position.x - cameraObj.transform.position.x, 0, transform.position.z - cameraObj.transform.position.z);
-        rbody.AddForce(dir * playerAirAccele.Power, ForceMode.Impulse);
+        // ブースト値を計算（y軸は落下などの重力処理にかかわるため計算しない）
+        var boost = new Vector3(dir.x, 0, dir.z) * playerAirAccele.Power;
+
+        // ブーストを水平速度に加算して即時反映
+        // AddForceだとlinearVelocityを書き換えている影響で反映されないため直接計算
+        horizontalVelocity += boost;
+
+        // ブースト値を加算した平行ベクトル、y軸は重力計算に任せる
+        rbody.linearVelocity = new Vector3(horizontalVelocity.x, rbody.linearVelocity.y, horizontalVelocity.z);
         transform.rotation = Quaternion.LookRotation(dir);
+
+        // 上昇重力スケールに切り替えて頂点まで滑らかに上がる
         jumpCTS?.Cancel();
         jumpCTS?.Dispose();
         jumpCTS = new CancellationTokenSource();
@@ -512,6 +579,49 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
                 selectableManager.SetTargetType(SelectableType.NONE);
             }
         }
+    }
+
+    /// <summary>
+    /// 壁に接触している間、法線を収集して壁スライドに使用する
+    /// OnCllisionStayは接触しているコライダーごとに呼び出しが行われる
+    /// </summary>
+    private void OnCollisionStay(Collision collision)
+    {
+        Vector3 wallNormal = Vector3.zero;
+        int count = 0;
+        
+        // 接触点から法線を取得、壁スライドできるようにMapに追加
+        foreach (ContactPoint contact in collision.contacts)
+        {
+            // y成分が小さい面のみ壁として扱う（床・天井を除外するための閾値）
+            // ※床・天井の法線は(0, 1, 0)だったり、(0, -1, 0)等になるため絶対値0.7以上を除外
+            if (Mathf.Abs(contact.normal.y) < 0.7f)
+            {
+                wallNormal += contact.normal;
+                count++;
+            }
+        }
+
+        // コライダーごとにOnCollistionStayが呼び出されるため、壁の判定として必要な法線情報のみ追加する
+        if (count > 0)
+        {
+            // Dictionaryへの追加（Mapでいうput(key, value)と同じ）
+            // ベクトルの長さを1にするためにwallNormal / countを行う
+            wallContactNormals[collision.collider.GetInstanceID()] = (wallNormal / count).normalized;
+        }
+        else
+        {
+            // 床・天井のみの接触になったときにMapから除外
+            wallContactNormals.Remove(collision.collider.GetInstanceID());
+        }
+    }
+
+    /// <summary>
+    /// 壁との接触が終了したら法線情報を削除する
+    /// </summary>
+    private void OnCollisionExit(Collision collision)
+    {
+        wallContactNormals.Remove(collision.collider.GetInstanceID());
     }
 
     // このメソッドは、スクリプトが付いたオブジェクトがSceneビューで選択されているときに呼び出されます
@@ -622,6 +732,7 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
     private async UniTaskVoid ResetHitStun(float hitStunTime)
     {
         await UniTask.WaitForSeconds(hitStunTime);
+        horizontalVelocity = new Vector3(rbody.linearVelocity.x, 0, rbody.linearVelocity.z);
         isStunned = false;
     }
 
