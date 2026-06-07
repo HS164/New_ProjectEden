@@ -3300,7 +3300,7 @@ PrefabInstance:
     - target: {fileID: 355960402988361258, guid: bec916380ddc5c64695014f2ab91d970,
         type: 3}
       propertyPath: attackCoolTime
-      value: 0
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 355960402988361258, guid: bec916380ddc5c64695014f2ab91d970,
         type: 3}
@@ -3316,6 +3316,31 @@ PrefabInstance:
         type: 3}
       propertyPath: descendingGravityScale
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 355960402988361258, guid: bec916380ddc5c64695014f2ab91d970,
+        type: 3}
+      propertyPath: moveSensitivity.maxSpeed
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 355960402988361258, guid: bec916380ddc5c64695014f2ab91d970,
+        type: 3}
+      propertyPath: moveSensitivity.turnSpeed
+      value: 800
+      objectReference: {fileID: 0}
+    - target: {fileID: 355960402988361258, guid: bec916380ddc5c64695014f2ab91d970,
+        type: 3}
+      propertyPath: moveSensitivity.increaseValue
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 355960402988361258, guid: bec916380ddc5c64695014f2ab91d970,
+        type: 3}
+      propertyPath: moveSensitivity.accelerationTime
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 355960402988361258, guid: bec916380ddc5c64695014f2ab91d970,
+        type: 3}
+      propertyPath: moveSensitivity.decelerationTime
+      value: 0.2
       objectReference: {fileID: 0}
     - target: {fileID: 418731805914451713, guid: bec916380ddc5c64695014f2ab91d970,
         type: 3}
