@@ -31,6 +31,7 @@ public class MoveSensitivity
     /// </summary>
     public void SpeedUp()
     {
+        // スピードボーナスの上限を指定（上限の指定だけでよいためMinを使用）
         speedBonus = Mathf.Min(speedBonus + increaseValue, maxSpeed);
     }
 
