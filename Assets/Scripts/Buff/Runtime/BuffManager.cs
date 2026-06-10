@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -19,11 +19,11 @@ public class BuffManager : SingletonBehaviour<BuffManager>
 {
     private const string BUFF_LABEL = "Buff";
 
-    private readonly List<SpeedBuffReceiver> _receivers = new List<SpeedBuffReceiver>();
-    private readonly List<IBuffSystem> _systems = new List<IBuffSystem>();
+    private readonly List<SpeedBuffReceiver> receivers = new List<SpeedBuffReceiver>();
+    private readonly List<IBuffSystem> systems = new List<IBuffSystem>();
 
-    private SpeedBuffReceiver _playerReceiver = null;
-    private AsyncOperationHandle<IList<BuffData>> _loadHandle;
+    private SpeedBuffReceiver playerReceiver = null;
+    private AsyncOperationHandle<IList<BuffData>> loadHandle;
 
     /// <summary>全バフ定義のロードが完了しているか</summary>
     public bool IsReady { get; private set; } = false;
@@ -50,8 +50,8 @@ public class BuffManager : SingletonBehaviour<BuffManager>
     /// </summary>
     private void InitializeSystems()
     {
-        Speed = new SpeedBuffSystem(_receivers);
-        _systems.Add(Speed);
+        Speed = new SpeedBuffSystem(receivers);
+        systems.Add(Speed);
 
         // 新しいバフ種別を追加する場合はここに追加する
         // Attack = new AttackBuffSystem(_receivers);
@@ -60,7 +60,7 @@ public class BuffManager : SingletonBehaviour<BuffManager>
 
     private void Update()
     {
-        foreach (var system in _systems)
+        foreach (var system in systems)
         {
             system.Tick(Time.deltaTime);
         }
@@ -68,9 +68,9 @@ public class BuffManager : SingletonBehaviour<BuffManager>
 
     private void OnDestroy()
     {
-        if (_loadHandle.IsValid())
+        if (loadHandle.IsValid())
         {
-            Addressables.Release(_loadHandle);
+            Addressables.Release(loadHandle);
         }
     }
 
@@ -82,19 +82,19 @@ public class BuffManager : SingletonBehaviour<BuffManager>
     /// </summary>
     private async UniTaskVoid LoadAllBuffDataAsync()
     {
-        _loadHandle = Addressables.LoadAssetsAsync<BuffData>(BUFF_LABEL, null);
-        await _loadHandle.ToUniTask();
+        loadHandle = Addressables.LoadAssetsAsync<BuffData>(BUFF_LABEL, null);
+        await loadHandle.ToUniTask();
 
-        if (_loadHandle.Status != AsyncOperationStatus.Succeeded)
+        if (loadHandle.Status != AsyncOperationStatus.Succeeded)
         {
             Debug.LogError($"[BuffManager] バフ定義のロードに失敗しました。ラベル: {BUFF_LABEL}");
             return;
         }
 
-        foreach (var data in _loadHandle.Result)
+        foreach (var data in loadHandle.Result)
         {
             var handled = false;
-            foreach (var system in _systems)
+            foreach (var system in systems)
             {
                 if (system.CanHandle(data))
                 {
@@ -121,16 +121,16 @@ public class BuffManager : SingletonBehaviour<BuffManager>
     /// </summary>
     public void Register(SpeedBuffReceiver receiver)
     {
-        if (_receivers.Contains(receiver))
+        if (receivers.Contains(receiver))
         {
             return;
         }
 
-        _receivers.Add(receiver);
+        receivers.Add(receiver);
 
         if (receiver.IsPlayer)
         {
-            _playerReceiver = receiver;
+            playerReceiver = receiver;
         }
     }
 
@@ -139,11 +139,11 @@ public class BuffManager : SingletonBehaviour<BuffManager>
     /// </summary>
     public void Unregister(SpeedBuffReceiver receiver)
     {
-        _receivers.Remove(receiver);
+        receivers.Remove(receiver);
 
-        if (_playerReceiver == receiver)
+        if (playerReceiver == receiver)
         {
-            _playerReceiver = null;
+            playerReceiver = null;
         }
     }
 
@@ -152,5 +152,5 @@ public class BuffManager : SingletonBehaviour<BuffManager>
     /// <summary>
     /// プレイヤーの速度倍率を取得する。未登録の場合は 1.0 を返す。
     /// </summary>
-    public float GetPlayerSpeedMultiplier() => _playerReceiver?.SpeedMultiplier ?? 1f;
+    public float GetPlayerSpeedMultiplier() => playerReceiver?.SpeedMultiplier ?? 1f;
 }

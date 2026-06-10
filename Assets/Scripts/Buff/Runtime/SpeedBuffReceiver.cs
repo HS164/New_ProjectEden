@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Events;
 
 /// <summary>
@@ -7,28 +7,28 @@ using UnityEngine.Events;
 /// </summary>
 public class SpeedBuffReceiver : MonoBehaviour
 {
-    [SerializeField] private float _minSpeedLimit = 0.1f;
-    [SerializeField] private float _maxSpeedLimit = 3.0f;
+    [SerializeField] private float minSpeedLimit = 0.1f;
+    [SerializeField] private float maxSpeedLimit = 3.0f;
 
     /// <summary>
     /// プレイヤー判定。NonPlayer対象のバフを受けなくなる。
     /// </summary>
-    [SerializeField] private bool _isPlayer = false;
+    [SerializeField] private bool isPlayer = false;
 
-    public bool IsPlayer => _isPlayer;
+    public bool IsPlayer => isPlayer;
 
     /// <summary>現在の最終速度倍率 (1.0 = 等速)</summary>
-    public float SpeedMultiplier => _container?.FinalMultiplier ?? 1f;
+    public float SpeedMultiplier => container?.FinalMultiplier ?? 1f;
 
     /// <summary>速度倍率が変化した際の通知 (引数: 最終速度倍率)</summary>
     public event UnityAction<float> OnSpeedChanged;
 
-    private SpeedBuffContainer _container;
+    private SpeedBuffContainer container;
 
     private void Awake()
     {
-        _container = new SpeedBuffContainer(_minSpeedLimit, _maxSpeedLimit);
-        _container.OnSpeedChanged += mult => OnSpeedChanged?.Invoke(mult);
+        container = new SpeedBuffContainer(minSpeedLimit, maxSpeedLimit);
+        container.OnSpeedChanged += mult => OnSpeedChanged?.Invoke(mult);
         BuffManager.Instance.Register(this);
     }
 
@@ -40,5 +40,5 @@ public class SpeedBuffReceiver : MonoBehaviour
     /// <summary>
     /// SpeedBuffManagerが内部的にバフコンテナへアクセスするために使用する。
     /// </summary>
-    internal SpeedBuffContainer GetContainer() => _container;
+    internal SpeedBuffContainer GetContainer() => container;
 }

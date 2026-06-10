@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -10,9 +10,9 @@ public class SpeedBuffContainer
 {
     private const float BASE_SPEED = 1.0f;
 
-    private readonly List<SpeedBuff> _buffs = new List<SpeedBuff>();
-    private readonly float _minSpeedLimit;
-    private readonly float _maxSpeedLimit;
+    private readonly List<SpeedBuff> buffs = new List<SpeedBuff>();
+    private readonly float minSpeedLimit;
+    private readonly float maxSpeedLimit;
 
     /// <summary>現在の最終速度倍率（速度制限適用済み）</summary>
     public float FinalMultiplier { get; private set; } = BASE_SPEED;
@@ -24,8 +24,8 @@ public class SpeedBuffContainer
     /// <param name="maxSpeedLimit">速度倍率の上限（エンティティごとに設定）</param>
     public SpeedBuffContainer(float minSpeedLimit, float maxSpeedLimit)
     {
-        _minSpeedLimit = minSpeedLimit;
-        _maxSpeedLimit = maxSpeedLimit;
+        this.minSpeedLimit = minSpeedLimit;
+        this.maxSpeedLimit = maxSpeedLimit;
     }
 
     /// <summary>
@@ -34,12 +34,12 @@ public class SpeedBuffContainer
     /// </summary>
     public void AddBuff(SpeedBuff buff)
     {
-        if (!buff.IsStackable && _buffs.Exists(b => b.BuffId == buff.BuffId))
+        if (!buff.IsStackable && buffs.Exists(b => b.BuffId == buff.BuffId))
         {
             return;
         }
 
-        _buffs.Add(buff);
+        buffs.Add(buff);
         Recalculate();
     }
 
@@ -48,7 +48,7 @@ public class SpeedBuffContainer
     /// </summary>
     public void RemoveBuff(string buffId)
     {
-        var removed = _buffs.RemoveAll(b => b.BuffId == buffId);
+        var removed = buffs.RemoveAll(b => b.BuffId == buffId);
         if (removed > 0)
         {
             Recalculate();
@@ -60,7 +60,7 @@ public class SpeedBuffContainer
     /// </summary>
     public void ClearBuffs()
     {
-        _buffs.Clear();
+        buffs.Clear();
         Recalculate();
     }
 
@@ -69,15 +69,15 @@ public class SpeedBuffContainer
     /// </summary>
     public void Tick(float deltaTime)
     {
-        foreach (var buff in _buffs)
+        foreach (var buff in buffs)
         {
             buff.Tick(deltaTime);
         }
 
-        var beforeCount = _buffs.Count;
-        _buffs.RemoveAll(b => b.IsExpired);
+        var beforeCount = buffs.Count;
+        buffs.RemoveAll(b => b.IsExpired);
 
-        if (_buffs.Count != beforeCount)
+        if (buffs.Count != beforeCount)
         {
             Recalculate();
         }
@@ -89,12 +89,12 @@ public class SpeedBuffContainer
     private void Recalculate()
     {
         var result = BASE_SPEED;
-        foreach (var buff in _buffs)
+        foreach (var buff in buffs)
         {
             result *= buff.Multiplier;
         }
 
-        var clamped = Mathf.Clamp(result, _minSpeedLimit, _maxSpeedLimit);
+        var clamped = Mathf.Clamp(result, minSpeedLimit, maxSpeedLimit);
         if (Mathf.Approximately(FinalMultiplier, clamped))
         {
             return;

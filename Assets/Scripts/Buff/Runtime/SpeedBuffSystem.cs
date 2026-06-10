@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -7,16 +7,16 @@ using UnityEngine;
 /// </summary>
 public class SpeedBuffSystem : IBuffSystem
 {
-    private readonly Dictionary<string, SpeedBuffData> _dataMap = new Dictionary<string, SpeedBuffData>();
+    private readonly Dictionary<string, SpeedBuffData> dataMap = new Dictionary<string, SpeedBuffData>();
 
     /// <summary>ロード済みの全SpeedBuffDataを返す（Editor確認用）</summary>
-    public IReadOnlyDictionary<string, SpeedBuffData> LoadedData => _dataMap;
-    private readonly IReadOnlyList<SpeedBuffReceiver> _receivers;
+    public IReadOnlyDictionary<string, SpeedBuffData> LoadedData => dataMap;
+    private readonly IReadOnlyList<SpeedBuffReceiver> receivers;
 
     /// <param name="receivers">BuffManagerが管理するエンティティリスト</param>
     public SpeedBuffSystem(IReadOnlyList<SpeedBuffReceiver> receivers)
     {
-        _receivers = receivers;
+        this.receivers = receivers;
     }
 
     // ─── IBuffSystem ────────────────────────────────────────────────
@@ -30,18 +30,18 @@ public class SpeedBuffSystem : IBuffSystem
             return;
         }
 
-        if (_dataMap.ContainsKey(speedData.BuffId))
+        if (dataMap.ContainsKey(speedData.BuffId))
         {
             Debug.LogWarning($"[SpeedBuffSystem] BuffId '{speedData.BuffId}' が重複しています。後から登録されたものを無視します。");
             return;
         }
 
-        _dataMap[speedData.BuffId] = speedData;
+        dataMap[speedData.BuffId] = speedData;
     }
 
     public void Tick(float deltaTime)
     {
-        foreach (var receiver in _receivers)
+        foreach (var receiver in receivers)
         {
             receiver.GetContainer().Tick(deltaTime);
         }
@@ -142,7 +142,7 @@ public class SpeedBuffSystem : IBuffSystem
 
     private void ApplyNonPlayer(SpeedBuffData data, float duration)
     {
-        foreach (var receiver in _receivers)
+        foreach (var receiver in receivers)
         {
             if (!receiver.IsPlayer)
             {
@@ -153,7 +153,7 @@ public class SpeedBuffSystem : IBuffSystem
 
     private void ApplyWorld(SpeedBuffData data, float duration)
     {
-        foreach (var receiver in _receivers)
+        foreach (var receiver in receivers)
         {
             receiver.GetContainer().AddBuff(data.CreateInstance(duration));
         }
@@ -161,7 +161,7 @@ public class SpeedBuffSystem : IBuffSystem
 
     private bool TryGetData(string buffId, out SpeedBuffData data)
     {
-        if (!_dataMap.TryGetValue(buffId, out data))
+        if (!dataMap.TryGetValue(buffId, out data))
         {
             Debug.LogWarning($"[SpeedBuffSystem] 存在しないバフIDが指定されました。buffId: {buffId}");
             return false;
