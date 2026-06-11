@@ -1,4 +1,4 @@
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
 
 /// <summary>
@@ -8,7 +8,7 @@ using UnityEngine;
 [CustomEditor(typeof(BuffManager))]
 public class BuffManagerEditor : Editor
 {
-    private bool _speedBuffFoldout = true;
+    private bool speedBuffFoldout = true;
 
     public override void OnInspectorGUI()
     {
@@ -48,9 +48,9 @@ public class BuffManagerEditor : Editor
     private void DrawSpeedBuffList(SpeedBuffSystem speedSystem)
     {
         var data = speedSystem.LoadedData;
-        _speedBuffFoldout = EditorGUILayout.Foldout(_speedBuffFoldout, $"速度バフ / デバフ  ({data.Count}件)", true);
+        speedBuffFoldout = EditorGUILayout.Foldout(speedBuffFoldout, $"速度バフ / デバフ  ({data.Count}件)", true);
 
-        if (!_speedBuffFoldout)
+        if (!speedBuffFoldout)
         {
             return;
         }
@@ -85,14 +85,14 @@ public class BuffManagerEditor : Editor
     // Guiの色を一時的に変えるスコープヘルパー
     private readonly struct GUIColorScope : System.IDisposable
     {
-        private readonly Color _previous;
+        private readonly Color previous;
 
         public GUIColorScope(Color color)
         {
-            _previous = GUI.color;
+            previous = GUI.color;
             GUI.color = color;
         }
 
-        public void Dispose() => GUI.color = _previous;
+        public void Dispose() => GUI.color = previous;
     }
 }
