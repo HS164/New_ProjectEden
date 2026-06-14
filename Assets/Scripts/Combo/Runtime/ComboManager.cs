@@ -17,6 +17,19 @@ public class ComboManager : SingletonBehaviour<ComboManager>
 	private Combo _combo = null;
 	private ComboGauge _comboGauge = null;
 
+	public float GetThresholdStep1() 
+	{
+		return _comboGauge.THRESHOLD_STEP1;
+	}
+	public float GetThresholdStep2()
+	{
+		return _comboGauge.THRESHOLD_STEP2;
+	}
+	public float GetThresholdStep3()
+	{
+		return _comboGauge.THRESHOLD_STEP3;
+	}
+
 	// --- 外部公開用のイベント ---
 
 	/// <summary>コンボ数が変化した際の通知 (引数: 現在のコンボ数)</summary>
