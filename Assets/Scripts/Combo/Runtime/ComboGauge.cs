@@ -6,9 +6,9 @@ using UnityEngine.Events;
 /// </summary>
 public class ComboGauge
 {
-	private const float THRESHOLD_STEP1 = 0.25f; // 第1段階: 25%
-	private const float THRESHOLD_STEP2 = 0.50f; // 第2段階: 50%
-	private const float THRESHOLD_STEP3 = 0.75f; // 第3段階: 75%
+	public float THRESHOLD_STEP1 { get; private set; } = 0.25f; // 第1段階: 25%
+	public float THRESHOLD_STEP2 { get; private set; } = 0.50f; // 第2段階: 50%
+	public float THRESHOLD_STEP3 { get; private set; } = 0.75f; // 第3段階: 75%
 
 	private const int StepNone = 0;
 	private const int Step1 = 1;

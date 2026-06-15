@@ -1,0 +1,8 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:VisualElement name="HpGaugeContainer" style="width: 300px; height: 30px; background-color: rgb(255, 255, 255); border-top-width: 2px; border-right-width: 2px; border-bottom-width: 2px; border-left-width: 2px; position: absolute; top: 90px; left: 18px; border-left-color: rgb(0, 0, 0); border-right-color: rgb(0, 0, 0); border-top-color: rgb(0, 0, 0); border-bottom-color: rgb(0, 0, 0);">
+        <ui:VisualElement name="HpBarFill" style="flex-grow: 1; background-color: rgb(76, 175, 80); position: relative; background-size: 68% 100%; width: 62%; -unity-background-scale-mode: scale-to-fit;" />
+        <ui:VisualElement name="Step1Line" style="flex-grow: 1; position: absolute; top: 0; bottom: 0; width: 3px; left: 25%; background-color: rgb(255, 255, 0);" />
+        <ui:VisualElement name="Step2Line" style="flex-grow: 1; position: absolute; top: 0; bottom: 0; width: 3px; left: 50%; background-color: rgb(255, 128, 0);" />
+        <ui:VisualElement name="Step3Line" style="flex-grow: 1; position: absolute; top: 0; bottom: 0; width: 3px; left: 75%; background-color: rgb(255, 0, 0);" />
+    </ui:VisualElement>
+</ui:UXML>
