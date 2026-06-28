@@ -1,5 +1,5 @@
-using Cysharp.Threading.Tasks;
-using JetBrains.Annotations;
+﻿using Cysharp.Threading.Tasks;
+using IceMilkTea.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +9,11 @@ using UnityEngine;
 
 public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
 {
+    ImtStateMachine<PlayerController> stateMachine;
+
     [SerializeField] private Rigidbody rbody;
+    private Animator animator;
+    [SerializeField] private PlayerAttack playerAttack;
 
     // 移動速度に関するパラメータ
     [SerializeField] private MoveSensitivity moveSensitivity;
@@ -61,16 +65,21 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
     [SerializeField, ReadOnly] private float currentHP;
     [SerializeField, ReadOnly] private float atk = 5;
 
+    private WeaponState currentState;
+
     private Vector3 horizontalVelocity = Vector3.zero;
     // 接触しているオブジェクトの法線ベクトルをMap形式で管理、コライダーのIDをkeyとして扱う
     // 変数の再代入ができないようにreadonlyで宣言(Javaのfinal)
     private readonly Dictionary<int, Vector3> wallContactNormals = new Dictionary<int, Vector3>();
+
+    private int attackCount = 0;
 
     private bool isDead = false;
     private bool isStunned = false;
     private bool isTargetingEnemy = false;
     private bool isTargetingWeapon = false;
     private bool autoJumpFlag = false;
+    private bool isAttacking = false;
 
     private PlayerInput_Controller.PlayerInputActions input;
 
@@ -78,6 +87,18 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
     SelectableObjectManager selectableManager;
 
     CancellationTokenSource jumpCTS;
+
+    /// <summary>
+    /// ステートの移動ENUM
+    /// </summary>
+    enum WeaponState
+    {
+        NONE,
+        AXE,
+        GUN,
+        SPEAR,
+        SWORD
+    }
 
     public float CurrentHp
     {
@@ -89,6 +110,41 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
     {
         get => maxHP;
         set => maxHP = value;
+    }
+
+    /// <summary>
+    /// ステートマシンのセットアップ
+    /// </summary>
+    private void Awake()
+    {
+        stateMachine = new ImtStateMachine<PlayerController>(this);
+
+        stateMachine.AddTransition<PlayerController_Gun, PlayerController_Axe>((int)WeaponState.AXE);
+        stateMachine.AddTransition<PlayerController_Spear, PlayerController_Axe>((int)WeaponState.AXE);
+        stateMachine.AddTransition<PlayerController_Sword, PlayerController_Axe>((int)WeaponState.AXE);
+        stateMachine.AddTransition<PlayerController_Unarmed, PlayerController_Axe>((int)WeaponState.AXE);
+
+        stateMachine.AddTransition<PlayerController_Axe, PlayerController_Gun>((int)WeaponState.GUN);
+        stateMachine.AddTransition<PlayerController_Spear, PlayerController_Gun>((int)WeaponState.GUN);
+        stateMachine.AddTransition<PlayerController_Sword, PlayerController_Gun>((int)WeaponState.GUN);
+        stateMachine.AddTransition<PlayerController_Unarmed, PlayerController_Gun>((int)WeaponState.GUN);
+
+        stateMachine.AddTransition<PlayerController_Axe, PlayerController_Spear>((int)WeaponState.SPEAR);
+        stateMachine.AddTransition<PlayerController_Gun, PlayerController_Spear>((int)WeaponState.SPEAR);
+        stateMachine.AddTransition<PlayerController_Sword, PlayerController_Spear>((int)WeaponState.SPEAR);
+        stateMachine.AddTransition<PlayerController_Unarmed, PlayerController_Spear>((int)WeaponState.SPEAR);
+
+        stateMachine.AddTransition<PlayerController_Axe, PlayerController_Sword>((int)WeaponState.SWORD);
+        stateMachine.AddTransition<PlayerController_Gun, PlayerController_Sword>((int)WeaponState.SWORD);
+        stateMachine.AddTransition<PlayerController_Spear, PlayerController_Sword>((int)WeaponState.SWORD);
+        stateMachine.AddTransition<PlayerController_Unarmed, PlayerController_Sword>((int)WeaponState.SWORD);
+
+        stateMachine.AddTransition<PlayerController_Axe, PlayerController_Unarmed>((int)WeaponState.NONE);
+        stateMachine.AddTransition<PlayerController_Gun, PlayerController_Unarmed>((int)WeaponState.NONE);
+        stateMachine.AddTransition<PlayerController_Spear, PlayerController_Unarmed>((int)WeaponState.NONE);
+        stateMachine.AddTransition<PlayerController_Sword, PlayerController_Unarmed>((int)WeaponState.NONE);
+
+        stateMachine.SetStartState<PlayerController_Unarmed>();
     }
 
     private void Start()
@@ -117,6 +173,9 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         selectableManager = SelectableObjectManager.instance;
         selectableManager.SetTargetType(SelectableType.GIMMICK);
         Cursor.lockState = CursorLockMode.Locked;
+        animator = GetComponent<Animator>();
+
+        stateMachine.Update();
     }
 
     private void OnEnable()
@@ -135,12 +194,6 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         if (isDead) 
         {
             return;
-        }
-
-        if (input.Jump.WasPressedThisFrame() && playerJump.IsJump() && !playerJump.CanJump() && IsNearLand())
-        {
-            autoJumpFlag = true;
-            Debug.Log("prep jump3");
         }
 
         if (IsLand())
@@ -190,31 +243,19 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
             }
         }
 
-        if (input.Attack.WasPressedThisFrame())
+        // 武器ステートの行動
+        stateMachine.Update();
+
+        // 攻撃中なら移動関連をしない
+        if (isAttacking)
         {
-            if (currentWeapon == null)
-            {
-                // weapon warp check
-                TelepotationTarget();
-                return;
-            }
-
-            if (isTargetingWeapon)
-            {
-                // warp check
-                TelepotationTarget();
-                return;
-            }
-            else if (isTargetingEnemy)
-            {
-                // enemy warp check
-                TelepotationTarget();
-                return;
-            }
-
-            Attack();
+            return;
         }
 
+        if (input.Jump.WasPressedThisFrame() && playerJump.IsJump() && !playerJump.CanJump() && IsNearLand())
+        {
+            autoJumpFlag = true;
+        }
 
         if (playerJump.IsJump())
         {
@@ -237,10 +278,10 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
             }
         }
 
-        if (input.TimeShift.WasPressedThisFrame() && !isTimeShifting)
-        {
-            TimeShift().Forget();
-        }
+        //if (input.TimeShift.WasPressedThisFrame() && !isTimeShifting)
+        //{
+        //    TimeShift().Forget();
+        //}
 
         // 移動スティックを話しているときの処理
         if (input.Move.ReadValue<Vector2>().magnitude < 0.1f)
@@ -258,22 +299,44 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
         // プロトタイプでスキルの起動を行うためのコード
         // ---------------------------ここから---------------------------
         // オーバードライブ
-        if (input.OverDrive.WasPressedThisFrame())
-        {
-            ActiveOverDrive();
-        }
+        //if (input.OverDrive.WasPressedThisFrame())
+        //{
+        //    ActiveOverDrive();
+        //}
 
         // クロノ・エンド
-        if (input.ChronoEnd.WasPressedThisFrame())
-        {
-            ActiveKronoEnd();
-        }
+        //if (input.ChronoEnd.WasPressedThisFrame())
+        //{
+        //    ActiveKronoEnd();
+        //}
         // ---------------------------ここまで---------------------------
     }
 
     private void FixedUpdate()
     {
         rbody.AddForce(Physics.gravity * gravityScale, ForceMode.Acceleration);
+    }
+
+    public void IncreaseAttackAnimCount()
+    {
+        attackCount++;
+    }
+
+    public void ResetAttackAnim()
+    {
+        attackCount = 0;
+        animator.SetInteger("AttackCount", attackCount);
+        isAttacking = false;
+    }
+
+    public float GetAttack()
+    {
+        return atk;
+    }
+
+    public void ResetAttackCollider()
+    {
+        playerAttack.ResetAttackCollider();
     }
 
     async UniTask WarpFloat()
@@ -396,6 +459,41 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
 
         // 攻撃アニメーションの終了を待機する
         ViewAttackAnimation().Forget();
+    }
+
+    private void BasicAttack()
+    {
+        int animAttackInt = animator.GetInteger("AttackCount");
+
+        if (animAttackInt == attackCount)
+        {
+            animator.SetInteger("AttackCount", attackCount + 1);
+
+            if (attackCount == 0)
+            {
+                isAttacking = true;
+            }
+        }
+    }
+
+    private void ChangeWeaponState()
+    {
+        if (currentWeapon is AxeWeapon)
+        {
+            stateMachine.SendEvent((int)WeaponState.AXE);
+        }
+        else if (currentWeapon is GunWeapon)
+        {
+            stateMachine.SendEvent((int)WeaponState.GUN);
+        }
+        else if (currentWeapon is SpearWeapon)
+        {
+            stateMachine.SendEvent((int)WeaponState.SPEAR);
+        }
+        else if (currentWeapon is SwordWeapon)
+        {
+            stateMachine.SendEvent((int)WeaponState.SWORD);
+        }
     }
 
     private void Jump()
@@ -561,6 +659,7 @@ public partial class PlayerController : MonoBehaviour, IDamageable, IPlayer
             {
                 weaponManager.ChangeWeapon(weapon);
                 currentWeapon = target.GetComponent<SelectableWeaponBase>();
+                ChangeWeaponState();
                 var weaponData = currentWeapon.GetWeaponData();
                 if (weaponData != null)
                 {
