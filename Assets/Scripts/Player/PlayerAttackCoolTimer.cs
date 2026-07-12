@@ -42,8 +42,8 @@ public class PlayerAttackCoolTimer
         Color originalColor = Color.white;
         if (player != null)
         {
-            originalColor = player.transform.GetComponent<MeshRenderer>().sharedMaterial.color;
-            player.transform.GetComponent<MeshRenderer>().sharedMaterial.color = Color.yellow;
+            originalColor = player.transform.GetComponentInChildren<MeshRenderer>().sharedMaterial.color;
+            player.transform.GetComponentInChildren<MeshRenderer>().sharedMaterial.color = Color.yellow;
         }
 
         Debug.Log("start attack cool timer. time : " + attackableCoolTime);
@@ -61,7 +61,7 @@ public class PlayerAttackCoolTimer
             if(player != null)
             {
                 // 色をもとに戻す
-                player.transform.GetComponent<MeshRenderer>().sharedMaterial.color = originalColor;
+                player.transform.GetComponentInChildren<MeshRenderer>().sharedMaterial.color = originalColor;
             }
         }
         catch(OperationCanceledException)
@@ -72,7 +72,7 @@ public class PlayerAttackCoolTimer
             if (player != null)
             {
                 // 色をもとに戻す
-                player.transform.GetComponent<MeshRenderer>().sharedMaterial.color = originalColor;
+                player.transform.GetComponentInChildren<MeshRenderer>().sharedMaterial.color = originalColor;
             }
         }
         finally
